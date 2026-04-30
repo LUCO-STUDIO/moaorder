@@ -1,0 +1,87 @@
+{/* AlertModal.mdx */}
+import { Meta } from '@storybook/blocks';
+
+<Meta title="디자인 시스템/Alert vs Sheet" />
+
+# Alert vs Sheet — 언제 무엇을 쓸까?
+
+Toss 디자인 원칙에서 핵심은 **사용자의 인지 부하를 줄이는 것**입니다.
+모달과 바텀시트를 잘못 사용하면 사용자가 맥락을 잃습니다.
+
+---
+
+## Alert / AlertDialog
+
+**언제**: 즉각적인 판단이 필요할 때. 1-2줄 이내의 메시지.
+
+```svelte
+<!-- 단순 확인 -->
+<script>
+  import { showAlert } from '$lib/stores/alert';
+  showAlert('저장 완료', '변경사항이 저장되었습니다.');
+</script>
+
+<!-- 확인/취소 -->
+<script>
+  import { showConfirm } from '$lib/stores/alert';
+  showConfirm({
+    title: '공구를 마감하시겠어요?',
+    description: '마감 후에는 추가 참여가 불가능합니다.',
+    confirmText: '마감하기',
+    onConfirm: handleClose,
+  });
+</script>
+```
+
+**특징**:
+- 배경을 어둡게 dim 처리 → 사용자의 시선을 집중
+- 확인/취소 버튼만 노출 → 선택지 최소화
+- `ghost` 스타일 버튼 사용 → 텍스트로 판단, 색상 의존 최소화
+
+---
+
+## Sheet (바텀시트)
+
+**언제**: 스크롤이 필요하거나, 폼 입력이 있거나, 여러 옵션 탐색이 필요할 때.
+
+```svelte
+<script>
+  import * as Sheet from '$lib/components/ui/sheet';
+  let open = $state(false);
+</script>
+
+<Sheet.Root bind:open>
+  <Sheet.Trigger>
+    <Button variant="outline">배송지 선택</Button>
+  </Sheet.Trigger>
+  <Sheet.Content side="bottom">
+    <Sheet.Header>
+      <Sheet.Title>배송지를 선택하세요</Sheet.Title>
+    </Sheet.Header>
+    <!-- 주소 목록 스크롤 -->
+  </Sheet.Content>
+</Sheet.Root>
+```
+
+**특징**:
+- 화면 아래에서 올라옴 → 현재 컨텍스트를 부분적으로 유지
+- 스크롤 가능 → 긴 목록, 폼 적합
+- 닫기는 스와이프 다운 또는 바깥 영역 터치
+
+---
+
+## 판단 체크리스트
+
+```
+사용자에게 "예/아니오" 판단을 요청하는가?
+  → YES: showAlert() 또는 showConfirm()
+
+내용이 3줄 이상이거나 스크롤이 필요한가?
+  → YES: Sheet
+
+사용자가 옵션을 탐색해야 하는가? (필터, 주소 선택 등)
+  → YES: Sheet (side="bottom")
+
+단순 성공/실패 피드백인가?
+  → YES: Sonner toast (가장 가벼움)
+```

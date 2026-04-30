@@ -1,0 +1,84 @@
+{/* DesignSystem.mdx */}
+import { Meta } from '@storybook/blocks';
+
+<Meta title="디자인 시스템/개요" />
+
+# 모아오더 디자인 시스템
+
+Toss 디자인 원칙에서 영감을 받은 모아오더의 UI 가이드라인입니다.
+
+---
+
+## 브랜드 컬러
+
+**Pop Red** `#EC4445` — 모아오더의 핵심 브랜드 컬러입니다.
+
+| 토큰 | OKLCH | 사용처 |
+|------|-------|--------|
+| `--brand-500` | `oklch(0.642 0.215 25.5)` | Primary (버튼, CTA, 링크) |
+| `--brand-600` | `oklch(0.577 0.245 27.325)` | Destructive (삭제, 오류) |
+| `--brand-50` | `oklch(0.971 0.013 17.38)` | Accent (배경 강조) |
+
+### 사용 원칙
+
+- **Primary 버튼**: 페이지당 하나. 주요 행동(주문, 참여, 저장)에만 사용
+- **Destructive**: 되돌릴 수 없는 행동(삭제, 취소)에만 사용
+- **Ghost/Outline**: 보조 행동, 모달 내 버튼에 활용
+
+---
+
+## 타이포그래피
+
+**SUIT Variable** 폰트를 사용합니다. Apple SD Gothic Neo 계열의 한국어 최적화 폰트입니다.
+
+```css
+--font-sans: 'SUIT Variable', system-ui, -apple-system, 'Apple SD Gothic Neo', sans-serif;
+```
+
+| 역할 | 크기 | 굵기 | 용도 |
+|------|------|------|------|
+| Display | 2rem (32px) | 700 | 온보딩 헤더 |
+| Heading | 1.5rem (24px) | 700 | 페이지 제목 |
+| Title | 1.25rem (20px) | 700 | 섹션 제목, 다이얼로그 |
+| Body | 0.875rem (14px) | 400 | 일반 본문 |
+| Caption | 0.75rem (12px) | 400 | 설명, 배지 |
+
+### `break-keep` 필수
+
+한국어 줄바꿈은 반드시 `break-keep`을 사용하세요. 단어 중간에서 줄바꿈되는 것을 방지합니다.
+
+---
+
+## 간격 & 모서리
+
+```css
+--radius: 0.75rem;        /* 기본 (12px) */
+--radius-sm:  calc(var(--radius) * 0.6);   /* 7.2px  — 뱃지, 태그 */
+--radius-md:  calc(var(--radius) * 0.8);   /* 9.6px  — 소형 버튼 */
+--radius-lg:  var(--radius);               /* 12px   — 기본 버튼, 입력 */
+--radius-xl:  calc(var(--radius) * 1.4);   /* 16.8px — 카드 */
+--radius-2xl: calc(var(--radius) * 1.8);   /* 21.6px — 바텀시트, 모달 */
+```
+
+---
+
+## 컴포넌트 사용 가이드
+
+### Alert vs Sheet
+
+| 상황 | 컴포넌트 | 이유 |
+|------|----------|------|
+| 확인 필요 (1-2줄) | `showAlert()` / `showConfirm()` | 모달 집중, 빠른 판단 |
+| 간단한 선택지 | `AlertDialog` | 구조화된 선택 |
+| 상세 폼/긴 콘텐츠 | `Sheet` (side=bottom) | 스크롤 가능, 컨텍스트 유지 |
+| 필터/정렬 | `Sheet` (side=bottom) | 옵션 다수, 탐색 패턴 |
+
+**원칙**: 사용자가 "읽고 판단"할 내용 → Alert. "탐색하거나 입력"할 내용 → Sheet.
+
+---
+
+## 접근성
+
+- 모든 인터랙티브 요소는 `focus-visible` 링 표시 (`--ring` 컬러)
+- 오류 상태는 `aria-invalid` 속성으로 표현 (`--destructive` 컬러)
+- 색상만으로 정보를 전달하지 않음 — 텍스트 레이블 병용
