@@ -1,1 +1,49 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+*.egg-info/
+dist/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build outputs
+apps/web/.svelte-kit/
+apps/web/build/
+apps/api/alembic/versions/*.pyc
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# OMC
 .omc
+
+# Claude Code runtime artifacts
+.claude/scheduled_tasks.lock
+
+# Playwright/UI screenshots (root-only)
+.playwright-mcp/
+/*.png
