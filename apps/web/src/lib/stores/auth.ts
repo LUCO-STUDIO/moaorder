@@ -5,6 +5,7 @@ export interface AuthUser {
 	id: string;
 	kakao_id: string | null;
 	role: 'owner' | 'customer';
+	is_owner: boolean;
 	nickname: string | null;
 	phone: string | null;
 	region: string | null;

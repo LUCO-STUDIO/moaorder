@@ -100,11 +100,7 @@
 			);
 			const me = await api.get<AuthUser>('/auth/me');
 			setUser(me);
-			if (me.role === 'owner') {
-				goto('/owner');
-			} else {
-				goto('/');
-			}
+			goto('/');
 		} catch (err: unknown) {
 			handleApiError(err, { fallbackTitle: '로그인 실패' });
 		} finally {

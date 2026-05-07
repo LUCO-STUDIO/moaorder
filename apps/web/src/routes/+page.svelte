@@ -9,11 +9,7 @@
 			goto('/auth/login');
 			return;
 		}
-		if (currentUser.role === 'owner') {
-			goto('/owner');
-		} else {
-			goto('/home');
-		}
+		goto('/home');
 	});
 </script>
 

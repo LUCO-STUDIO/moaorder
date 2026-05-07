@@ -275,11 +275,28 @@ async def require_auth(
     return current_user
 
 
+async def user_owns_any_store(user_id: uuid.UUID, db: AsyncSession) -> bool:
+    """True iff the user has at least one StoreMember row with role='owner'."""
+    result = await db.execute(
+        select(StoreMember.id)
+        .where(StoreMember.user_id == user_id, StoreMember.role == "owner")
+        .limit(1)
+    )
+    return result.scalar_one_or_none() is not None
+
+
 async def require_owner(
     current_user: Annotated[User, Depends(get_current_user)],
+    db: AsyncSession = Depends(get_db),
 ) -> User:
-    if current_user.role != "owner":
-        raise HTTPException(status_code=403, detail="사장님만 접근할 수 있습니다")
+    """Allow access only if the user owns at least one store.
+
+    Replaces the legacy `User.role == 'owner'` check: owner status is now
+    derived from the StoreMember table, so a single user can be both a
+    customer and a store owner without flipping a role flag.
+    """
+    if not await user_owns_any_store(current_user.id, db):
+        raise HTTPException(status_code=403, detail="매장 사장님만 접근할 수 있습니다")
     return current_user
 
 

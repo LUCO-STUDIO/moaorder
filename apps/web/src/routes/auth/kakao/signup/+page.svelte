@@ -137,11 +137,7 @@
 			const me = await api.get<AuthUser>('/auth/me');
 			setUser(me);
 			toast.success('회원가입이 완료됐어요.');
-			if (me.role === 'owner') {
-				goto('/owner');
-			} else {
-				goto('/');
-			}
+			goto('/');
 		} catch (err: unknown) {
 			handleApiError(err, { fallbackTitle: '회원가입 실패' });
 		} finally {
