@@ -425,7 +425,7 @@
 								이용약관 동의 <span class="text-muted-foreground">(필수)</span>
 							</span>
 						</label>
-						<div class="max-h-40 space-y-3 overflow-y-auto bg-muted/30 px-4 py-3 text-[12px] leading-relaxed text-muted-foreground">
+						<div class="max-h-40 space-y-3 overflow-y-auto rounded-l-[12px] bg-muted/30 px-4 py-3 text-[12px] leading-relaxed text-muted-foreground">
 							{#each termsBlocks as block}
 								<div>
 									{#if block.body.length > 0}
@@ -487,7 +487,7 @@
 				<!-- Privacy collection notice card -->
 				<div class="space-y-3 rounded-[16px] border border-border bg-card p-5">
 					<p class="text-[15px] font-bold text-foreground">개인정보 수집 및 이용 안내</p>
-					<div class="max-h-40 space-y-3 overflow-y-auto bg-muted/30 px-4 py-3 text-[12px] leading-relaxed text-muted-foreground">
+					<div class="max-h-40 space-y-3 overflow-y-auto rounded-l-[12px] bg-muted/30 px-4 py-3 text-[12px] leading-relaxed text-muted-foreground">
 						{#each privacyBlocks as block}
 							<div>
 								{#if block.body.length > 0}
