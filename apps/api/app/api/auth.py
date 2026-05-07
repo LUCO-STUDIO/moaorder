@@ -12,6 +12,7 @@ from app.core.auth import (
     create_kakao_signup_token,
     exchange_kakao_code,
     get_current_user,
+    user_owns_any_store,
     verify_kakao_signup_token,
 )
 from app.core.database import get_db
@@ -139,11 +140,14 @@ async def logout(response: Response) -> dict:
 @router.get("/me", response_model=UserResponse)
 async def get_me(
     current_user: Annotated[User, Depends(get_current_user)],
+    db: AsyncSession = Depends(get_db),
 ) -> UserResponse:
+    is_owner = await user_owns_any_store(current_user.id, db)
     return UserResponse(
         id=str(current_user.id),
         kakao_id=current_user.kakao_id,
         role=current_user.role,
+        is_owner=is_owner,
         nickname=current_user.nickname,
         phone=current_user.phone,
         region=current_user.region,

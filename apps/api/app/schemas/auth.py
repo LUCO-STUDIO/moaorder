@@ -46,6 +46,7 @@ class UserResponse(BaseModel):
     id: str
     kakao_id: Optional[str] = None
     role: str
+    is_owner: bool = False
     nickname: Optional[str] = None
     phone: Optional[str] = None
     region: Optional[str] = None

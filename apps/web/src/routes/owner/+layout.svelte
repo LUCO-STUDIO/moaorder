@@ -47,7 +47,7 @@
 			<p class="text-sm text-muted-foreground">잠시만요...</p>
 		</div>
 	</div>
-{:else if $user && $user.role === 'owner'}
+{:else if $user && $user.is_owner}
 	<div class="min-h-screen bg-muted/30 flex">
 		<!-- Desktop sidebar -->
 		<aside class="hidden md:flex md:flex-col md:w-60 md:fixed md:inset-y-0 bg-background border-r border-border z-40">

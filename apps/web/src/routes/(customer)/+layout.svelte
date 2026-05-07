@@ -38,10 +38,9 @@
 			goto('/auth/login');
 			return;
 		}
-		if (currentUser.role === 'owner') {
-			goto('/owner');
-			return;
-		}
+		// Owner-and-customer dual mode: do not redirect store owners away.
+		// They land on the unified home; owner-only sections appear when
+		// currentUser.is_owner is true.
 		return startNotificationPolling();
 	});
 </script>
