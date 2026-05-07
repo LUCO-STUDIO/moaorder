@@ -39,6 +39,8 @@
 
 	import { user, fetchMe } from '$lib/stores/auth';
 	import { toast } from 'svelte-sonner';
+	import { goto } from '$app/navigation';
+	import { IconPlus } from '@tabler/icons-svelte';
 
 	import { REGIONS } from '$lib/regions';
 	import { CATEGORIES } from '$lib/categories';
@@ -96,6 +98,14 @@
 			error = '홈 피드를 불러오지 못했습니다';
 		} finally {
 			loading = false;
+		}
+	}
+
+	function handleCreateGroup() {
+		if ($user?.is_owner) {
+			goto('/owner/groups/create');
+		} else {
+			goto('/onboarding/owner');
 		}
 	}
 
@@ -378,6 +388,17 @@
 		</section>
 	{/if}
 </div>
+
+<!-- Create group floating action button -->
+<button
+	type="button"
+	onclick={handleCreateGroup}
+	aria-label="공구 만들기"
+	class="fixed bottom-20 right-4 z-40 flex h-14 items-center gap-2 rounded-full bg-primary px-5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:brightness-95 active:scale-95 md:bottom-8 md:right-8 md:h-12 md:px-4 md:text-[13px]"
+>
+	<IconPlus size={20} stroke={2.5} />
+	공구 만들기
+</button>
 
 <!-- Region picker -->
 {#if regionPickerOpen}
