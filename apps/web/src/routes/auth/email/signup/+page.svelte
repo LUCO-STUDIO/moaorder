@@ -306,6 +306,9 @@
 							id="name"
 							type="text"
 							bind:value={name}
+							onkeydown={(e) => {
+								if (e.key === 'Tab' && !e.shiftKey) birthdatePopoverOpen = true;
+							}}
 							placeholder="이름"
 							autocomplete="name"
 							aria-label="이름"
@@ -323,7 +326,6 @@
 							<PopoverTrigger
 								aria-label="생년월일 선택"
 								disabled={loading}
-								onfocus={() => (birthdatePopoverOpen = true)}
 								class="{inputClass} cursor-pointer items-center text-left {displayBirthdate ? 'text-foreground' : 'text-muted-foreground/40'}"
 							>
 								{displayBirthdate || '생년월일'}
