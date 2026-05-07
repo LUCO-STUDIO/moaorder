@@ -22,7 +22,7 @@
 	import { CalendarDate, getLocalTimeZone, today, type DateValue } from '@internationalized/date';
 
 	type Step = 'fields' | 'consents';
-	let step = $state<Step>('fields');
+	let step = $state<Step>(page.url.searchParams.get('step') === 'consents' ? 'consents' : 'fields');
 
 	let email = $state(page.url.searchParams.get('email') ?? '');
 	let password = $state('');
