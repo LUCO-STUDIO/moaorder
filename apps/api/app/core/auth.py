@@ -70,6 +70,42 @@ def verify_email_token(token: str, expected_purpose: str) -> dict:
     return payload
 
 
+# --- Kakao signup token (short-lived, post-OAuth pre-consent) ---
+
+
+def create_kakao_signup_token(
+    kakao_id: str,
+    nickname: Optional[str],
+    profile_image: Optional[str],
+) -> str:
+    """Issue a short-lived JWT carrying the verified Kakao profile.
+
+    Used between Kakao OAuth callback and the consent screen, so the user
+    can complete signup (terms + birthdate) without re-authenticating.
+    """
+    expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    payload = {
+        "kakao_id": kakao_id,
+        "nickname": nickname,
+        "profile_image": profile_image,
+        "purpose": "kakao_signup",
+        "exp": expire,
+    }
+    return jwt.encode(payload, settings.JWT_SECRET, algorithm=ALGORITHM)
+
+
+def verify_kakao_signup_token(token: str) -> dict:
+    try:
+        payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[ALGORITHM])
+    except JWTError as exc:
+        raise HTTPException(
+            status_code=400, detail="유효하지 않거나 만료된 가입 토큰입니다"
+        ) from exc
+    if payload.get("purpose") != "kakao_signup":
+        raise HTTPException(status_code=400, detail="올바르지 않은 토큰 용도입니다")
+    return payload
+
+
 # --- Kakao ---
 
 

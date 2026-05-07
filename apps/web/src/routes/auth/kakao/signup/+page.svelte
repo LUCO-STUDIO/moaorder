@@ -8,12 +8,6 @@
 	import { toast } from 'svelte-sonner';
 	import { handleApiError } from '$lib/error-handler';
 	import {
-		IconEye,
-		IconEyeOff,
-		IconShieldX,
-		IconAlertTriangleFilled,
-		IconShieldHalfFilled,
-		IconShieldCheckFilled,
 		IconCircleCheck,
 		IconCircleCheckFilled,
 		IconCheck
@@ -24,17 +18,14 @@
 	import termsText from '$lib/legal/terms.txt?raw';
 	import privacyText from '$lib/legal/privacy-collection.txt?raw';
 
-	type Step = 'fields' | 'consents';
-	let step = $state<Step>(page.url.searchParams.get('step') === 'consents' ? 'consents' : 'fields');
+	const signupToken = page.url.searchParams.get('signup_token') ?? '';
+	const kakaoNickname = page.url.searchParams.get('nickname') ?? '';
 
-	let email = $state(page.url.searchParams.get('email') ?? '');
-	let password = $state('');
-	let name = $state('');
-	let birthdate = $state(''); // YYYYMMDD (8 digits)
+	let name = $state(kakaoNickname);
+	let birthdate = $state(''); // YYYYMMDD
 	let birthdateValue = $state<DateValue | undefined>(undefined);
 	let birthdatePopoverOpen = $state(false);
 	let loading = $state(false);
-	let showPassword = $state(false);
 
 	const todayDate = today(getLocalTimeZone());
 	const minDate = new CalendarDate(1900, 1, 1);
@@ -54,90 +45,25 @@
 			: ''
 	);
 
-	let emailError = $state('');
-	let passwordError = $state('');
-	let nameError = $state('');
-	let birthdateError = $state('');
-
-	// Consents
-	let agreeTerms = $state(false);
-	let agreePrivacy = $state(false);
-	let consentError = $state('');
-
-	let allRequired = $derived(agreeTerms);
-	let agreeAll = $derived(allRequired && agreePrivacy);
-
-	// Age 14+ derived from birthdate (PIPA §22-2)
 	const isAge14Plus = $derived(() => {
 		if (!birthdateValue) return false;
-		const t = todayDate;
-		let age = t.year - birthdateValue.year;
+		let age = todayDate.year - birthdateValue.year;
 		const beforeBirthday =
-			t.month < birthdateValue.month ||
-			(t.month === birthdateValue.month && t.day < birthdateValue.day);
+			todayDate.month < birthdateValue.month ||
+			(todayDate.month === birthdateValue.month && todayDate.day < birthdateValue.day);
 		if (beforeBirthday) age--;
 		return age >= 14;
 	});
 
-	const isEmailValid = $derived(
-		/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)
-	);
-	const isPasswordValid = $derived(
-		password.length >= 8 &&
-			password.length <= 16 &&
-			/(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};:'",.<>/?\\|`~])/.test(password)
-	);
-	const isNameValid = $derived(name.trim().length > 0);
-	const isBirthdateValid = $derived(/^\d{8}$/.test(birthdate));
-	const isStep1Valid = $derived(
-		isEmailValid && isPasswordValid && isNameValid && isBirthdateValid
-	);
+	let nameError = $state('');
+	let birthdateError = $state('');
 
-	type PasswordStrength = 'unusable' | 'weak' | 'medium' | 'safe';
-	const passwordStrength = $derived<PasswordStrength | null>(
-		password.length === 0 ? null : computeStrength(password)
-	);
+	let agreeTerms = $state(false);
+	let agreePrivacy = $state(false);
+	let consentError = $state('');
 
-	function computeStrength(pw: string): PasswordStrength {
-		const lengthOk = pw.length >= 8 && pw.length <= 16;
-		const hasLetter = /[A-Za-z]/.test(pw);
-		const hasNumber = /\d/.test(pw);
-		const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};:'",.<>/?\\|`~]/.test(pw);
-		if (!lengthOk || !hasLetter || !hasNumber || !hasSpecial) return 'unusable';
-		const hasUpper = /[A-Z]/.test(pw);
-		const hasLower = /[a-z]/.test(pw);
-		let score = 0;
-		if (hasUpper) score++;
-		if (hasLower) score++;
-		if (hasNumber) score++;
-		if (hasSpecial) score++;
-		if (pw.length >= 12) score++;
-		if (pw.length >= 14) score++;
-		if (score >= 6) return 'safe';
-		if (score >= 5) return 'medium';
-		return 'weak';
-	}
-
-	const strengthLabel: Record<PasswordStrength, string> = {
-		unusable: '사용불가',
-		weak: '위험',
-		medium: '보통',
-		safe: '안전'
-	};
-	const strengthBadgeClass: Record<PasswordStrength, string> = {
-		unusable: 'bg-destructive/10 text-destructive',
-		weak: 'bg-orange-500/10 text-orange-600',
-		medium: 'bg-amber-500/10 text-amber-600',
-		safe: 'bg-emerald-500/10 text-emerald-600'
-	};
-	const strengthIcon = {
-		unusable: IconShieldX,
-		weak: IconAlertTriangleFilled,
-		medium: IconShieldHalfFilled,
-		safe: IconShieldCheckFilled
-	} as const;
-
-	let emailInput: HTMLInputElement | null = $state(null);
+	const allRequired = $derived(agreeTerms);
+	const agreeAll = $derived(allRequired && agreePrivacy);
 
 	function toggleAll() {
 		const next = !agreeAll;
@@ -168,30 +94,16 @@
 	const termsBlocks = parseBlocks(termsText);
 	const privacyBlocks = parseBlocks(privacyText);
 
-	function validateFields(): boolean {
-		emailError = '';
-		passwordError = '';
+	function validateInputs(): boolean {
 		nameError = '';
 		birthdateError = '';
 		let ok = true;
-
-		if (!email || !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
-			emailError = '유효한 이메일 주소를 입력해주세요';
-			ok = false;
-		}
-		if (password.length < 8 || password.length > 16) {
-			passwordError = '비밀번호는 8~16자여야 합니다';
-			ok = false;
-		} else if (!/(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};:'",.<>/?\\|`~])/.test(password)) {
-			passwordError = '영문, 숫자, 특수문자를 모두 포함해야 합니다';
-			ok = false;
-		}
 		if (!name.trim()) {
 			nameError = '이름을 입력해주세요';
 			ok = false;
 		}
 		if (!/^\d{8}$/.test(birthdate)) {
-			birthdateError = '생년월일 8자리를 입력해주세요 (예: 19900101)';
+			birthdateError = '생년월일을 선택해주세요';
 			ok = false;
 		} else if (!isAge14Plus()) {
 			birthdateError = '만 14세 이상만 가입할 수 있어요';
@@ -200,33 +112,31 @@
 		return ok;
 	}
 
-	async function handleNext() {
-		if (!validateFields()) return;
-		step = 'consents';
-		await tick();
-		window.scrollTo({ top: 0 });
-	}
-
-	async function handleBack() {
-		step = 'fields';
-		await tick();
-		window.scrollTo({ top: 0 });
-	}
-
 	async function handleSubmit() {
 		consentError = '';
+		if (!validateInputs()) return;
 		if (!allRequired) {
-			consentError = '필수 항목에 모두 동의해주세요';
+			consentError = '필수 항목에 동의해주세요';
 			return;
 		}
+		if (!signupToken) {
+			toast.error('가입 세션이 만료되었습니다. 다시 로그인해주세요.');
+			goto('/auth/login');
+			return;
+		}
+
 		loading = true;
 		try {
-			// Backend currently accepts: email, password, nickname
-			// TODO: extend to send name, birthdate, consents (marketing) once API supports
-			await api.post('/auth/email/signup', { email, password, nickname: name.trim() });
+			await api.post('/auth/kakao/complete-signup', {
+				signup_token: signupToken,
+				name: name.trim(),
+				birthdate,
+				agree_terms: agreeTerms,
+				agree_privacy: agreePrivacy
+			});
 			const me = await api.get<AuthUser>('/auth/me');
 			setUser(me);
-			toast.success('회원가입이 완료됐어요. 이메일 인증 링크를 확인해주세요.');
+			toast.success('회원가입이 완료됐어요.');
 			if (me.role === 'owner') {
 				goto('/owner');
 			} else {
@@ -237,6 +147,7 @@
 		} finally {
 			loading = false;
 		}
+		await tick();
 	}
 
 	const inputClass =
@@ -249,7 +160,6 @@
 	<title>회원가입 - 모아오더</title>
 </svelte:head>
 
-<!-- Header: desktop only — wordmark with BAND-style subtle drop shadow -->
 <header
 	class="relative z-10 hidden h-[52px] items-center justify-center bg-background shadow-[0_1px_1px_0_rgba(0,0,0,0.08)] sm:flex"
 >
@@ -263,82 +173,19 @@
 
 <main class="bg-background px-10 pt-[38px] pb-8 sm:px-8">
 	<div class="mx-auto w-full space-y-[40px] sm:max-w-[440px]">
-		<!-- Title -->
 		<div class="text-center">
 			<h1 class="text-[25px] font-medium leading-tight text-foreground sm:text-[32px]">
 				회원가입
 			</h1>
-			{#if step === 'consents'}
-				<p class="mt-[11px] text-sm text-muted-foreground">서비스 이용을 위한 안내를 확인하세요.</p>
-			{:else if email}
-				<p class="mt-0.5 text-[23px] font-light text-muted-foreground">{email}</p>
-			{/if}
+			<p class="mt-[11px] text-sm text-muted-foreground">카카오 계정으로 가입을 마무리할게요.</p>
 		</div>
 
-		{#if step === 'fields'}
-			<form
-				onsubmit={(e) => { e.preventDefault(); handleNext(); }}
-				class="space-y-[34px]"
-			>
-				<div class="space-y-[40px]">
-					{#if emailError}
-						<p class="text-xs text-destructive text-center">{emailError}</p>
-					{/if}
-
-					<!-- Password -->
-					<div class="relative space-y-1.5">
-						<input
-							id="password"
-							type={showPassword ? 'text' : 'password'}
-							bind:value={password}
-							oninput={(e) => {
-								const filtered = e.currentTarget.value.replace(/[^\x20-\x7E]/g, '');
-								if (filtered !== e.currentTarget.value) {
-									e.currentTarget.value = filtered;
-									password = filtered;
-								}
-							}}
-							placeholder="비밀번호"
-							autocomplete="new-password"
-							aria-label="비밀번호"
-							lang="en"
-							inputmode="text"
-							class="{inputClass} pr-32"
-							disabled={loading}
-						/>
-						{#if passwordStrength}
-							{@const StrengthIcon = strengthIcon[passwordStrength]}
-							<span
-								aria-live="polite"
-								class="pointer-events-none absolute top-1/2 right-10 flex -translate-y-1/2 items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold {strengthBadgeClass[passwordStrength]}"
-							>
-								<StrengthIcon size={12} />
-								{strengthLabel[passwordStrength]}
-							</span>
-						{/if}
-						{#if password.length > 0}
-							<button
-								type="button"
-								onclick={() => (showPassword = !showPassword)}
-								aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 표시'}
-								class="absolute top-1/2 right-0 flex size-9 -translate-y-1/2 cursor-pointer items-center justify-center text-muted-foreground/60 transition-colors hover:text-foreground"
-							>
-								{#if showPassword}
-									<IconEyeOff size={20} stroke={1.5} />
-								{:else}
-									<IconEye size={20} stroke={1.5} />
-								{/if}
-							</button>
-						{/if}
-						<p class="pointer-events-none absolute top-full left-0 mt-1.5 text-xs text-muted-foreground/60">
-							8~16자 영문 대소문자, 숫자, 특수문자를 사용하세요.
-						</p>
-						{#if passwordError}
-							<p class="text-xs text-destructive">{passwordError}</p>
-						{/if}
-					</div>
-
-					<!-- Name -->
+		<form
+			onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}
+			class="space-y-[24px]"
+		>
+			<div class="space-y-3">
+				<div class="space-y-[28px]">
 					<div class="space-y-1.5">
 						<input
 							id="name"
@@ -358,7 +205,6 @@
 						{/if}
 					</div>
 
-					<!-- Birthdate -->
 					<div class="space-y-1.5">
 						<Popover bind:open={birthdatePopoverOpen}>
 							<PopoverTrigger
@@ -386,17 +232,6 @@
 					</div>
 				</div>
 
-				<button type="submit" disabled={loading || !isStep1Valid} class={submitClass}>
-					확인
-				</button>
-			</form>
-		{:else}
-			<form
-				onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}
-				class="space-y-[24px]"
-			>
-				<div class="space-y-3">
-				<!-- Consents card (BAND style) -->
 				<div class="space-y-[11px] rounded-[16px] border border-border bg-card p-5">
 					<button
 						type="button"
@@ -485,7 +320,6 @@
 					{/if}
 				</div>
 
-				<!-- Privacy collection notice card -->
 				<div class="space-y-3 rounded-[16px] border border-border bg-card p-5">
 					<p class="text-[15px] font-bold text-foreground">개인정보 수집 및 이용 안내</p>
 					<div class="max-h-40 space-y-3 overflow-y-auto rounded-l-[12px] bg-muted/30 px-4 py-3 text-[12px] leading-relaxed text-muted-foreground">
@@ -516,19 +350,18 @@
 						</div>
 					</div>
 				</div>
-				</div>
+			</div>
 
-				<button type="submit" disabled={loading || !allRequired} aria-busy={loading} class={submitClass}>
-					<span class={loading ? 'invisible' : ''}>확인</span>
-					{#if loading}
-						<span class="absolute inset-0 flex items-center justify-center gap-1.5" aria-hidden="true">
-							<span class="size-2 animate-bounce rounded-full bg-current [animation-delay:-0.3s]"></span>
-							<span class="size-2 animate-bounce rounded-full bg-current [animation-delay:-0.15s]"></span>
-							<span class="size-2 animate-bounce rounded-full bg-current"></span>
-						</span>
-					{/if}
-				</button>
-			</form>
-		{/if}
+			<button type="submit" disabled={loading || !allRequired} aria-busy={loading} class={submitClass}>
+				<span class={loading ? 'invisible' : ''}>확인</span>
+				{#if loading}
+					<span class="absolute inset-0 flex items-center justify-center gap-1.5" aria-hidden="true">
+						<span class="size-2 animate-bounce rounded-full bg-current [animation-delay:-0.3s]"></span>
+						<span class="size-2 animate-bounce rounded-full bg-current [animation-delay:-0.15s]"></span>
+						<span class="size-2 animate-bounce rounded-full bg-current"></span>
+					</span>
+				{/if}
+			</button>
+		</form>
 	</div>
 </main>
