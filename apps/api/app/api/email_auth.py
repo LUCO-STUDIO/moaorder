@@ -4,6 +4,7 @@ import os
 import re
 import uuid as _uuid
 from datetime import datetime, timezone
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, EmailStr, Field
@@ -69,6 +70,7 @@ class SignupRequest(BaseModel):
     verified_email_token: str = Field(..., min_length=1)
     password: str = Field(..., min_length=8)
     nickname: str = Field(..., min_length=1, max_length=50)
+    region: Optional[str] = Field(default=None, max_length=100)
 
 
 class SendCodeRequest(BaseModel):
@@ -191,6 +193,7 @@ async def signup(
         password_hash=hash_password(body.password),
         nickname=body.nickname,
         role="customer",
+        region=body.region.strip() if body.region else None,
         email_verified_at=datetime.now(timezone.utc),
     )
     db.add(user)
