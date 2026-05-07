@@ -306,6 +306,9 @@
 							id="name"
 							type="text"
 							bind:value={name}
+							onkeydown={(e) => {
+								if (e.key === 'Tab' && !e.shiftKey) birthdatePopoverOpen = true;
+							}}
 							placeholder="이름"
 							autocomplete="name"
 							aria-label="이름"
