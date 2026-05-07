@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { Toaster as Sonner, type ToasterProps as SonnerProps } from "svelte-sonner";
 	import { mode } from "mode-watcher";
-	import { HugeiconsIcon } from '@hugeicons/svelte';
 	import {
-		Loading03Icon,
-		CheckmarkCircleIcon,
-		OctagonXIcon,
-		InformationCircleIcon,
-		DangerIcon
-	} from '@hugeicons/core-free-icons';
+		IconLoader2,
+		IconCircleCheck,
+		IconAlertOctagonFilled,
+		IconInfoCircle,
+		IconAlertTriangleFilled
+	} from '@tabler/icons-svelte';
 
 	let { ...restProps }: SonnerProps = $props();
 </script>
@@ -20,18 +19,18 @@
 	{...restProps}
 >
 	{#snippet loadingIcon()}
-		<HugeiconsIcon icon={Loading03Icon} size={16} class="animate-spin" />
+		<IconLoader2 size={16} class="animate-spin" />
 	{/snippet}
 	{#snippet successIcon()}
-		<HugeiconsIcon icon={CheckmarkCircleIcon} size={16} />
+		<IconCircleCheck size={16} />
 	{/snippet}
 	{#snippet errorIcon()}
-		<HugeiconsIcon icon={OctagonXIcon} size={16} />
+		<IconAlertOctagonFilled size={16} />
 	{/snippet}
 	{#snippet infoIcon()}
-		<HugeiconsIcon icon={InformationCircleIcon} size={16} />
+		<IconInfoCircle size={16} />
 	{/snippet}
 	{#snippet warningIcon()}
-		<HugeiconsIcon icon={DangerIcon} size={16} />
+		<IconAlertTriangleFilled size={16} />
 	{/snippet}
 </Sonner>

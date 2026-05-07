@@ -7,16 +7,15 @@
 	import type { AuthUser } from '$lib/stores/auth';
 	import { toast } from 'svelte-sonner';
 	import { handleApiError } from '$lib/error-handler';
-	import { HugeiconsIcon } from '@hugeicons/svelte';
 	import {
-		EyeIcon,
-		ViewOffIcon,
-		SecurityBlockIcon,
-		DangerIcon,
-		ShieldHalfIcon,
-		SecurityCheckIcon,
-		CheckmarkCircleIcon
-	} from '@hugeicons/core-free-icons';
+		IconEye,
+		IconEyeOff,
+		IconShieldX,
+		IconAlertTriangleFilled,
+		IconShieldHalfFilled,
+		IconShieldCheckFilled,
+		IconCircleCheckFilled
+	} from '@tabler/icons-svelte';
 	import { Popover, PopoverTrigger, PopoverContent } from '$lib/components/ui/popover';
 	import { Calendar } from '$lib/components/ui/calendar';
 	import { CalendarDate, getLocalTimeZone, today, type DateValue } from '@internationalized/date';
@@ -117,12 +116,12 @@
 		medium: 'bg-amber-500/10 text-amber-600',
 		safe: 'bg-emerald-500/10 text-emerald-600'
 	};
-	const strengthIcon: Record<PasswordStrength, typeof SecurityBlockIcon> = {
-		unusable: SecurityBlockIcon,
-		weak: DangerIcon,
-		medium: ShieldHalfIcon,
-		safe: SecurityCheckIcon
-	};
+	const strengthIcon = {
+		unusable: IconShieldX,
+		weak: IconAlertTriangleFilled,
+		medium: IconShieldHalfFilled,
+		safe: IconShieldCheckFilled
+	} as const;
 
 	let emailInput: HTMLInputElement | null = $state(null);
 
@@ -270,13 +269,12 @@
 							disabled={loading}
 						/>
 						{#if passwordStrength}
+							{@const StrengthIcon = strengthIcon[passwordStrength]}
 							<span
 								aria-live="polite"
 								class="pointer-events-none absolute top-1/2 right-10 flex -translate-y-1/2 items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold {strengthBadgeClass[passwordStrength]}"
 							>
-								{#key passwordStrength}
-									<HugeiconsIcon icon={strengthIcon[passwordStrength]} size={12} strokeWidth={2} />
-								{/key}
+								<StrengthIcon size={12} />
 								{strengthLabel[passwordStrength]}
 							</span>
 						{/if}
@@ -287,13 +285,11 @@
 								aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 표시'}
 								class="absolute top-1/2 right-0 flex size-9 -translate-y-1/2 cursor-pointer items-center justify-center text-muted-foreground/60 transition-colors hover:text-foreground"
 							>
-								<HugeiconsIcon
-									icon={EyeIcon}
-									altIcon={ViewOffIcon}
-									showAlt={showPassword}
-									size={20}
-									strokeWidth={1.5}
-								/>
+								{#if showPassword}
+									<IconEyeOff size={20} stroke={1.5} />
+								{:else}
+									<IconEye size={20} stroke={1.5} />
+								{/if}
 							</button>
 						{/if}
 						<p class="pointer-events-none absolute top-full left-0 mt-1.5 text-xs text-muted-foreground/60">
@@ -365,8 +361,7 @@
 						onclick={toggleAll}
 						class="flex w-full cursor-pointer items-center gap-3 text-left"
 					>
-						<HugeiconsIcon
-							icon={CheckmarkCircleIcon}
+						<IconCircleCheckFilled
 							size={22}
 							class={agreeAll ? 'text-primary' : 'text-muted-foreground/40'}
 						/>
@@ -378,8 +373,7 @@
 
 					<label class="flex cursor-pointer items-center gap-3">
 						<input type="checkbox" bind:checked={agreeAge} class="sr-only" />
-						<HugeiconsIcon
-							icon={CheckmarkCircleIcon}
+						<IconCircleCheckFilled
 							size={22}
 							class={agreeAge ? 'text-primary' : 'text-muted-foreground/40'}
 						/>
@@ -391,8 +385,7 @@
 					<label class="flex cursor-pointer items-center justify-between gap-3">
 						<div class="flex items-center gap-3">
 							<input type="checkbox" bind:checked={agreeTerms} class="sr-only" />
-							<HugeiconsIcon
-								icon={CheckmarkCircleIcon}
+							<IconCircleCheckFilled
 								size={22}
 								class={agreeTerms ? 'text-primary' : 'text-muted-foreground/40'}
 							/>
@@ -413,8 +406,7 @@
 					<label class="flex cursor-pointer items-center justify-between gap-3">
 						<div class="flex items-center gap-3">
 							<input type="checkbox" bind:checked={agreePrivacy} class="sr-only" />
-							<HugeiconsIcon
-								icon={CheckmarkCircleIcon}
+							<IconCircleCheckFilled
 								size={22}
 								class={agreePrivacy ? 'text-primary' : 'text-muted-foreground/40'}
 							/>
@@ -434,8 +426,7 @@
 
 					<label class="flex cursor-pointer items-center gap-3">
 						<input type="checkbox" bind:checked={agreeMarketing} class="sr-only" />
-						<HugeiconsIcon
-							icon={CheckmarkCircleIcon}
+						<IconCircleCheckFilled
 							size={22}
 							class={agreeMarketing ? 'text-primary' : 'text-muted-foreground/40'}
 						/>
