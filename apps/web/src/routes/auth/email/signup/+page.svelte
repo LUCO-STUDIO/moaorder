@@ -403,7 +403,7 @@
 							</span>
 						</label>
 						<div class="max-h-40 overflow-y-auto rounded-[12px] border border-border bg-muted/30 px-4 py-3 text-[12px] leading-relaxed text-muted-foreground whitespace-pre-line">
-							{termsText}
+							{termsText.trim()}
 						</div>
 					</div>
 
