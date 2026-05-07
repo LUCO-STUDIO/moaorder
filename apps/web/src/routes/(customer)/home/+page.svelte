@@ -40,38 +40,29 @@
 	import { user, fetchMe } from '$lib/stores/auth';
 	import { toast } from 'svelte-sonner';
 
-	const REGIONS = [
-		'서울특별시 강남구',
-		'서울특별시 강동구',
-		'서울특별시 강북구',
-		'서울특별시 마포구',
-		'서울특별시 송파구',
-		'서울특별시 영등포구',
-		'서울특별시 종로구',
-		'경기도 성남시',
-		'경기도 수원시',
-		'경기도 용인시',
-		'대구광역시 동구',
-		'대구광역시 수성구',
-		'대구광역시 중구',
-		'부산광역시 해운대구',
-		'부산광역시 부산진구',
-		'인천광역시 연수구',
-		'대전광역시 유성구',
-		'광주광역시 서구',
-		'울산광역시 남구',
-		'제주특별자치도 제주시'
-	];
+	import { REGIONS } from '$lib/regions';
 
 	let todayPickups: TodayPickupItem[] = $state([]);
 	let activeOrders: ActiveOrderItem[] = $state([]);
 	let feed: FeedItem[] = $state([]);
+	let subscribedFeed: FeedItem[] = $state([]);
 	let loading = $state(true);
 	let error = $state('');
 	let regionPickerOpen = $state(false);
 	let savingRegion = $state(false);
+	let regionSearch = $state('');
 
 	const currentRegion = $derived($user?.region ?? '');
+	const filteredRegions = $derived(
+		regionSearch.trim()
+			? REGIONS.filter((r) => r.includes(regionSearch.trim()))
+			: REGIONS
+	);
+
+	function isClosingSoon(closesAt: string): boolean {
+		const diff = new Date(closesAt).getTime() - Date.now();
+		return diff > 0 && diff <= 24 * 3_600_000;
+	}
 
 	function timeUntil(closesAt: string): string {
 		const diff = new Date(closesAt).getTime() - Date.now();
@@ -90,10 +81,11 @@
 
 	async function loadFeed() {
 		try {
-			[todayPickups, activeOrders, feed] = await Promise.all([
+			[todayPickups, activeOrders, feed, subscribedFeed] = await Promise.all([
 				api.get<TodayPickupItem[]>('/home/today-pickup'),
 				api.get<ActiveOrderItem[]>('/home/my-orders-active'),
-				api.get<FeedItem[]>('/home/feed')
+				api.get<FeedItem[]>('/home/feed'),
+				api.get<FeedItem[]>('/home/feed/subscribed')
 			]);
 		} catch {
 			error = '홈 피드를 불러오지 못했습니다';
@@ -220,6 +212,42 @@
 			</section>
 		{/if}
 
+		<!-- 내 구독 매장 공구 -->
+		{#if subscribedFeed.length > 0}
+			<section class="space-y-2.5">
+				<h2 class="text-sm font-semibold text-foreground">내 구독 매장 공구</h2>
+				<ul class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+					{#each subscribedFeed as item}
+						<li>
+							<a
+								href="/g/{item.public_id}"
+								class="block overflow-hidden rounded-xl bg-card ring-1 ring-border transition-all hover:ring-primary/30 active:scale-[0.99]"
+							>
+								{#if item.image_url}
+									<img src={item.image_url} alt={item.product_name} class="h-40 w-full object-cover" />
+								{:else}
+									<div class="flex h-32 w-full items-center justify-center bg-muted text-3xl">📦</div>
+								{/if}
+								<div class="space-y-1 px-4 py-3.5">
+									<p class="text-xs text-muted-foreground">{item.store_name}</p>
+									<p class="text-sm font-semibold text-foreground">{item.product_name}</p>
+									<div class="flex items-center justify-between pt-0.5">
+										<p class="text-base font-bold text-primary">₩{item.price.toLocaleString()}</p>
+										<div class="flex items-center gap-2 text-xs text-muted-foreground">
+											{#if item.remaining_qty !== null}
+												<span>잔여 {item.remaining_qty}개</span>
+											{/if}
+											<span class="font-medium {isClosingSoon(item.closes_at) ? 'text-destructive' : 'text-primary/80'}">{timeUntil(item.closes_at)}</span>
+										</div>
+									</div>
+								</div>
+							</a>
+						</li>
+					{/each}
+				</ul>
+			</section>
+		{/if}
+
 		<!-- 동네 공동구매 피드 -->
 		<section class="space-y-2.5">
 			<div class="flex items-end justify-between">
@@ -264,16 +292,19 @@
 								href="/g/{item.public_id}"
 								class="block rounded-xl bg-card ring-1 ring-border overflow-hidden hover:ring-primary/30 transition-all active:scale-[0.99]"
 							>
-								{#if item.image_url}
-									<img
-										src={item.image_url}
-										alt={item.product_name}
-										class="w-full h-40 object-cover"
-									/>
-								{:else}
-									<div class="w-full h-32 bg-muted flex items-center justify-center text-3xl">📦</div>
-								{/if}
-								<div class="px-4 py-3.5 space-y-1">
+								<div class="relative">
+									{#if item.image_url}
+										<img src={item.image_url} alt={item.product_name} class="h-40 w-full object-cover" />
+									{:else}
+										<div class="flex h-32 w-full items-center justify-center bg-muted text-3xl">📦</div>
+									{/if}
+									{#if isClosingSoon(item.closes_at)}
+										<span class="absolute left-2 top-2 rounded-full bg-destructive px-2 py-0.5 text-[10px] font-bold text-destructive-foreground shadow">
+											마감 임박
+										</span>
+									{/if}
+								</div>
+								<div class="space-y-1 px-4 py-3.5">
 									<p class="text-xs text-muted-foreground">{item.store_name}</p>
 									<p class="text-sm font-semibold text-foreground">{item.product_name}</p>
 									<div class="flex items-center justify-between pt-0.5">
@@ -284,7 +315,7 @@
 											{#if item.remaining_qty !== null}
 												<span>잔여 {item.remaining_qty}개</span>
 											{/if}
-											<span class="text-primary/80 font-medium">{timeUntil(item.closes_at)}</span>
+											<span class="font-medium {isClosingSoon(item.closes_at) ? 'text-destructive' : 'text-primary/80'}">{timeUntil(item.closes_at)}</span>
 										</div>
 									</div>
 								</div>
@@ -319,8 +350,17 @@
 				</button>
 			</div>
 			<p class="mb-3 text-xs text-muted-foreground">선택한 동네의 공동구매가 홈에 보입니다.</p>
+			<input
+				type="search"
+				bind:value={regionSearch}
+				placeholder="동네 검색 (예: 강남, 성남)"
+				class="mb-3 h-10 w-full rounded-lg border border-input bg-transparent px-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+			/>
 			<ul class="max-h-[60vh] space-y-1 overflow-y-auto">
-				{#each REGIONS as region}
+				{#if filteredRegions.length === 0}
+					<li class="px-3 py-4 text-center text-xs text-muted-foreground">검색 결과가 없습니다.</li>
+				{/if}
+				{#each filteredRegions as region}
 					<li>
 						<button
 							type="button"
