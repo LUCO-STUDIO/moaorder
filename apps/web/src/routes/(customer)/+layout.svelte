@@ -80,69 +80,91 @@
 		</div>
 	</div>
 {:else if $user && $user.role === 'customer'}
-	<!-- Desktop: centered phone-frame; Mobile: full-width -->
-	<div class="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 md:flex md:items-start md:justify-center md:py-0">
-		<div class="relative w-full md:max-w-md md:min-h-screen md:shadow-2xl md:shadow-black/20 bg-background">
-			<!-- Email verification banner -->
-			{#if $user && $user.email && !$user.email_verified && !verificationBannerDismissed}
-				<div class="flex items-center gap-2 bg-amber-50 px-4 py-2.5 text-xs text-amber-800 border-b border-amber-200">
-					<svg class="size-4 shrink-0 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+	<div class="min-h-screen bg-background">
+		<!-- Email verification banner -->
+		{#if $user && $user.email && !$user.email_verified && !verificationBannerDismissed}
+			<div class="flex items-center gap-2 bg-amber-50 px-4 py-2.5 text-xs text-amber-800 border-b border-amber-200">
+				<svg class="size-4 shrink-0 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+				</svg>
+				<span class="flex-1">이메일 인증을 완료해주세요.</span>
+				<button
+					onclick={resendVerification}
+					class="font-semibold underline underline-offset-2 hover:text-amber-900"
+				>
+					인증 링크 다시 받기
+				</button>
+				<button
+					onclick={() => { verificationBannerDismissed = true; }}
+					class="ml-1 rounded p-0.5 hover:bg-amber-100"
+					aria-label="닫기"
+				>
+					<svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
 					</svg>
-					<span class="flex-1">이메일 인증을 완료해주세요.</span>
-					<button
-						onclick={resendVerification}
-						class="font-semibold underline underline-offset-2 hover:text-amber-900"
-					>
-						인증 링크 다시 받기
-					</button>
-					<button
-						onclick={() => { verificationBannerDismissed = true; }}
-						class="ml-1 rounded p-0.5 hover:bg-amber-100"
-						aria-label="닫기"
-					>
-						<svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-						</svg>
-					</button>
-				</div>
-			{/if}
-
-			<!-- Content area with bottom padding for nav -->
-			<div class="pb-20">
-				{@render children()}
+				</button>
 			</div>
+		{/if}
 
-			<!-- Bottom navigation -->
-			<nav class="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-sm pb-[env(safe-area-inset-bottom)] md:left-auto md:w-full md:max-w-md">
-				<div class="flex">
+		<!-- Desktop top nav (hidden on mobile) -->
+		<header class="sticky top-0 z-40 hidden border-b border-border bg-background/95 backdrop-blur-sm md:block">
+			<div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+				<a href="/" class="text-[24px] font-black tracking-[-0.05em] text-foreground">
+					moaorder
+				</a>
+				<nav class="flex items-center gap-1">
 					{#each navItems as item}
 						{@const active = isActive(item.href)}
 						<a
 							href={item.href}
-							class="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium transition-colors {active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}"
+							class="relative rounded-md px-3 py-2 text-sm font-medium transition-colors {active ? 'text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}"
 						>
-							<span class="relative">
-								{#if item.icon === HomeIcon}
-									{@render HomeIcon(active)}
-								{:else if item.icon === ClipboardIcon}
-									{@render ClipboardIcon(active)}
-								{:else if item.icon === BellIcon}
-									{@render BellIcon(active)}
-									{#if $unreadCount > 0}
-										<span class="absolute -right-1.5 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-0.5 text-[9px] font-bold text-primary-foreground">
-											{$unreadCount > 99 ? '99+' : $unreadCount}
-										</span>
-									{/if}
-								{:else if item.icon === UserIcon}
-									{@render UserIcon(active)}
-								{/if}
-							</span>
-							<span>{item.label}</span>
+							{item.label}
+							{#if item.icon === BellIcon && $unreadCount > 0}
+								<span class="absolute -right-1 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">
+									{$unreadCount > 99 ? '99+' : $unreadCount}
+								</span>
+							{/if}
 						</a>
 					{/each}
-				</div>
-			</nav>
-		</div>
+				</nav>
+			</div>
+		</header>
+
+		<!-- Content area: full width on mobile (with bottom nav padding), centered on desktop -->
+		<main class="mx-auto w-full max-w-6xl pb-20 md:pb-8 md:px-6 md:pt-6">
+			{@render children()}
+		</main>
+
+		<!-- Mobile bottom navigation (hidden on desktop) -->
+		<nav class="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-sm pb-[env(safe-area-inset-bottom)] md:hidden">
+			<div class="flex">
+				{#each navItems as item}
+					{@const active = isActive(item.href)}
+					<a
+						href={item.href}
+						class="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium transition-colors {active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}"
+					>
+						<span class="relative">
+							{#if item.icon === HomeIcon}
+								{@render HomeIcon(active)}
+							{:else if item.icon === ClipboardIcon}
+								{@render ClipboardIcon(active)}
+							{:else if item.icon === BellIcon}
+								{@render BellIcon(active)}
+								{#if $unreadCount > 0}
+									<span class="absolute -right-1.5 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-0.5 text-[9px] font-bold text-primary-foreground">
+										{$unreadCount > 99 ? '99+' : $unreadCount}
+									</span>
+								{/if}
+							{:else if item.icon === UserIcon}
+								{@render UserIcon(active)}
+							{/if}
+						</span>
+						<span>{item.label}</span>
+					</a>
+				{/each}
+			</div>
+		</nav>
 	</div>
 {/if}
