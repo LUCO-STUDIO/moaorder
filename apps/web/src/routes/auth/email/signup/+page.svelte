@@ -61,11 +61,10 @@
 	// Consents
 	let agreeTerms = $state(false);
 	let agreePrivacy = $state(false);
-	let agreeMarketing = $state(false);
 	let consentError = $state('');
 
 	let allRequired = $derived(agreeTerms);
-	let agreeAll = $derived(allRequired && agreePrivacy && agreeMarketing);
+	let agreeAll = $derived(allRequired && agreePrivacy);
 
 	// Age 14+ derived from birthdate (PIPA §22-2)
 	const isAge14Plus = $derived(() => {
@@ -143,7 +142,6 @@
 		const next = !agreeAll;
 		agreeTerms = next;
 		agreePrivacy = next;
-		agreeMarketing = next;
 	}
 
 	function downloadTerms() {
@@ -472,17 +470,16 @@
 								보기
 							</a>
 						</label>
-						<label class="flex cursor-pointer items-center gap-3 pl-9">
-							<input type="checkbox" bind:checked={agreeMarketing} class="sr-only" />
+						<div class="flex items-center gap-3 pl-9">
 							<IconCheck
 								size={16}
 								stroke={2.5}
-								class={agreeMarketing ? 'text-primary' : 'text-muted-foreground/30'}
+								class={agreePrivacy ? 'text-primary' : 'text-muted-foreground/30'}
 							/>
 							<span class="text-[11px] text-muted-foreground">
-								이벤트, 광고성 정보 안내 <span>(선택)</span>
+								이벤트, 광고성 정보 안내 (선택)
 							</span>
-						</label>
+						</div>
 					</div>
 
 					{#if consentError}
