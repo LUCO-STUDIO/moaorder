@@ -15,7 +15,8 @@
 		IconShieldHalfFilled,
 		IconShieldCheckFilled,
 		IconCircleCheck,
-		IconCircleCheckFilled
+		IconCircleCheckFilled,
+		IconCheck
 	} from '@tabler/icons-svelte';
 	import { Popover, PopoverTrigger, PopoverContent } from '$lib/components/ui/popover';
 	import { Calendar } from '$lib/components/ui/calendar';
@@ -473,11 +474,11 @@
 						</label>
 						<label class="flex cursor-pointer items-center gap-3 pl-9">
 							<input type="checkbox" bind:checked={agreeMarketing} class="sr-only" />
-							{#if agreeMarketing}
-								<IconCircleCheckFilled size={20} class="text-primary" />
-							{:else}
-								<IconCircleCheck size={20} class="text-muted-foreground/20" />
-							{/if}
+							<IconCheck
+								size={18}
+								stroke={2.5}
+								class={agreeMarketing ? 'text-primary' : 'text-muted-foreground/30'}
+							/>
 							<span class="text-[14px] text-muted-foreground">
 								이벤트, 광고성 정보 안내 <span>(선택)</span>
 							</span>
