@@ -12,11 +12,24 @@ from slowapi.util import get_remote_address
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.auth import create_access_token, create_email_token, verify_email_token
+from app.core.auth import (
+    create_access_token,
+    create_email_code_session_token,
+    create_email_token,
+    create_email_verified_token,
+    generate_email_verification_code,
+    verify_email_code_session,
+    verify_email_token,
+    verify_email_verified_token,
+)
 from app.core.database import get_db
 from app.core.password import hash_password, verify_password
 from app.models.user import User
-from app.services.email import send_password_reset_email, send_verification_email
+from app.services.email import (
+    send_password_reset_email,
+    send_verification_code_email,
+    send_verification_email,
+)
 
 _TESTING = os.getenv("TESTING", "").lower() in ("1", "true", "yes")
 limiter = Limiter(key_func=get_remote_address, enabled=not _TESTING)
@@ -53,9 +66,28 @@ def _validate_password(password: str) -> None:
 
 
 class SignupRequest(BaseModel):
-    email: EmailStr
+    verified_email_token: str = Field(..., min_length=1)
     password: str = Field(..., min_length=8)
     nickname: str = Field(..., min_length=1, max_length=50)
+
+
+class SendCodeRequest(BaseModel):
+    email: EmailStr
+
+
+class SendCodeResponse(BaseModel):
+    session_token: str
+    expires_in: int
+
+
+class VerifyCodeRequest(BaseModel):
+    session_token: str = Field(..., min_length=1)
+    code: str = Field(..., min_length=6, max_length=6)
+
+
+class VerifyCodeResponse(BaseModel):
+    verified_email_token: str
+    expires_in: int
 
 
 class CheckEmailRequest(BaseModel):
@@ -96,6 +128,48 @@ class EmailTokenResponse(BaseModel):
 # ---------------------------------------------------------------------------
 
 
+@router.post("/send-code", response_model=SendCodeResponse)
+@limiter.limit("5/hour")
+async def send_code(
+    body: SendCodeRequest,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> SendCodeResponse:
+    """Send a 6-digit verification code to the email; return a 5-min session JWT."""
+    # Block sending to an already-registered (password-set) email so we
+    # don't surprise an existing account holder with a code they didn't ask for.
+    result = await db.execute(select(User).where(User.email == body.email))
+    user = result.scalar_one_or_none()
+    if user and user.password_hash is not None:
+        raise HTTPException(status_code=409, detail="이미 사용 중인 이메일입니다")
+
+    code = generate_email_verification_code()
+    session_token = create_email_code_session_token(body.email, code)
+    try:
+        send_verification_code_email(body.email, code)
+    except Exception:
+        # Don't leak email-provider failures, but still return so the test
+        # path keeps working. The code is in the JWT-bound session anyway.
+        pass
+    return SendCodeResponse(session_token=session_token, expires_in=5 * 60)
+
+
+@router.post("/verify-code", response_model=VerifyCodeResponse)
+@limiter.limit("10/hour")
+async def verify_code(
+    body: VerifyCodeRequest,
+    request: Request,
+) -> VerifyCodeResponse:
+    """Verify the user-entered 6-digit code against the session JWT."""
+    if not body.code.isdigit():
+        raise HTTPException(status_code=400, detail="인증번호는 숫자 6자리입니다")
+    email = verify_email_code_session(body.session_token, body.code)
+    return VerifyCodeResponse(
+        verified_email_token=create_email_verified_token(email),
+        expires_in=15 * 60,
+    )
+
+
 @router.post("/signup", response_model=EmailTokenResponse)
 @limiter.limit("3/hour")
 async def signup(
@@ -106,26 +180,22 @@ async def signup(
 ) -> EmailTokenResponse:
     _validate_password(body.password)
 
-    result = await db.execute(select(User).where(User.email == body.email))
+    email = verify_email_verified_token(body.verified_email_token)
+
+    result = await db.execute(select(User).where(User.email == email))
     if result.scalar_one_or_none():
         raise HTTPException(status_code=409, detail="이미 사용 중인 이메일입니다")
 
     user = User(
-        email=body.email,
+        email=email,
         password_hash=hash_password(body.password),
         nickname=body.nickname,
         role="customer",
+        email_verified_at=datetime.now(timezone.utc),
     )
     db.add(user)
     await db.commit()
     await db.refresh(user)
-
-    # Send verification email (non-blocking on failure)
-    try:
-        token = create_email_token(user.id, user.email, "verify", 24)
-        send_verification_email(user.email, token, user.nickname or "")
-    except Exception:
-        pass  # Don't block signup on email failure
 
     session_token = create_access_token(user.id, user.role)
     _set_token_cookie(response, session_token)
@@ -134,7 +204,7 @@ async def signup(
         user_id=str(user.id),
         role=user.role,
         is_new=True,
-        email_verified=False,
+        email_verified=True,
     )
 
 

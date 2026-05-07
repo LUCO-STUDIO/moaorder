@@ -28,6 +28,7 @@
 	let step = $state<Step>(page.url.searchParams.get('step') === 'consents' ? 'consents' : 'fields');
 
 	let email = $state(page.url.searchParams.get('email') ?? '');
+	const verifiedEmailToken = page.url.searchParams.get('verified_email_token') ?? '';
 	let password = $state('');
 	let name = $state('');
 	let birthdate = $state(''); // YYYYMMDD (8 digits)
@@ -223,7 +224,16 @@
 		try {
 			// Backend currently accepts: email, password, nickname
 			// TODO: extend to send name, birthdate, consents (marketing) once API supports
-			await api.post('/auth/email/signup', { email, password, nickname: name.trim() });
+			if (!verifiedEmailToken) {
+				toast.error('이메일 인증 세션이 만료되었어요. 다시 진행해주세요.');
+				goto(`/auth/email/verify-email?email=${encodeURIComponent(email)}`);
+				return;
+			}
+			await api.post('/auth/email/signup', {
+				verified_email_token: verifiedEmailToken,
+				password,
+				nickname: name.trim()
+			});
 			const me = await api.get<AuthUser>('/auth/me');
 			setUser(me);
 			toast.success('회원가입이 완료됐어요. 이메일 인증 링크를 확인해주세요.');

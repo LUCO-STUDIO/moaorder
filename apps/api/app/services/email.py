@@ -139,6 +139,23 @@ def _auth_base_template(title: str, body_html: str) -> str:
 </html>"""
 
 
+def send_verification_code_email(to: str, code: str) -> str | None:
+    """Send a 6-digit inline-signup verification code."""
+    body = f"""
+    <p>모아오더 회원가입을 진행해주셔서 감사합니다.</p>
+    <p>아래 인증번호를 가입 화면에 입력해주세요.</p>
+    <p style="margin:24px 0">
+      <span style="display:inline-block;font-size:32px;letter-spacing:8px;font-weight:bold;color:{BRAND_COLOR};
+                   border:1px solid #e5e7eb;border-radius:8px;padding:16px 24px;background:#fafafa">
+        {code}
+      </span>
+    </p>
+    <p style="font-size:13px;color:#6b7280">인증번호는 5분 동안 유효합니다. 본인이 요청하지 않으셨다면 이 메일을 무시하세요.</p>
+    """
+    html = _auth_base_template("이메일 인증번호", body)
+    return send_email(to, "[모아오더] 인증번호를 입력해주세요", html)
+
+
 def send_verification_email(to: str, token: str, nickname: str) -> str | None:
     """Send email verification link."""
     verify_url = f"{settings.FRONTEND_URL}/auth/email/verify?token={token}"
