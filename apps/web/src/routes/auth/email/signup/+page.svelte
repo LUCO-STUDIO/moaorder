@@ -262,7 +262,7 @@
 </header>
 
 <main class="bg-background px-10 pt-[38px] pb-8 sm:px-8">
-	<div class="mx-auto w-full space-y-[40px] sm:max-w-[360px]">
+	<div class="mx-auto w-full space-y-[40px] sm:max-w-[440px]">
 		<!-- Title -->
 		<div class="text-center">
 			<h1 class="text-[25px] font-medium leading-tight text-foreground sm:text-[32px]">
@@ -395,6 +395,7 @@
 				onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}
 				class="space-y-[40px]"
 			>
+				<div class="space-y-3">
 				<!-- Consents card (BAND style) -->
 				<div class="space-y-[11px] rounded-[16px] border border-border bg-card p-5">
 					<button
@@ -514,6 +515,7 @@
 							</button>
 						</div>
 					</div>
+				</div>
 				</div>
 
 				<button type="submit" disabled={loading || !allRequired} aria-busy={loading} class={submitClass}>
