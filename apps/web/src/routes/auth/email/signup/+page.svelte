@@ -390,7 +390,7 @@
 				class="space-y-[40px]"
 			>
 				<!-- Consents card (BAND style) -->
-				<div class="space-y-4 rounded-[16px] border border-border bg-card p-5">
+				<div class="space-y-[11px] rounded-[16px] border border-border bg-card p-5">
 					<button
 						type="button"
 						onclick={toggleAll}
@@ -476,7 +476,7 @@
 								stroke={2.5}
 								class={agreePrivacy ? 'text-primary' : 'text-muted-foreground/30'}
 							/>
-							<span class="text-[11px] text-muted-foreground">
+							<span class="text-[13px] text-muted-foreground">
 								이벤트, 광고성 정보 안내 (선택)
 							</span>
 						</div>
