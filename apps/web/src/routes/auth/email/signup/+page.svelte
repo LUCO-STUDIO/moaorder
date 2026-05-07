@@ -63,8 +63,8 @@
 	let agreeMarketing = $state(false);
 	let consentError = $state('');
 
-	let allRequired = $derived(agreeTerms && agreePrivacy);
-	let agreeAll = $derived(allRequired && agreeMarketing);
+	let allRequired = $derived(agreeTerms);
+	let agreeAll = $derived(allRequired && agreePrivacy && agreeMarketing);
 
 	// Age 14+ derived from birthdate (PIPA §22-2)
 	const isAge14Plus = $derived(() => {
@@ -420,7 +420,7 @@
 								이용약관 동의 <span class="text-muted-foreground">(필수)</span>
 							</span>
 						</label>
-						<div class="max-h-40 space-y-3 overflow-y-auto rounded-[12px] bg-muted/30 px-4 py-3 text-[12px] leading-relaxed text-muted-foreground">
+						<div class="max-h-40 space-y-3 overflow-y-auto bg-muted/30 px-4 py-3 text-[12px] leading-relaxed text-muted-foreground">
 							{#each termsBlocks as block}
 								<div>
 									{#if block.body.length > 0}
@@ -458,7 +458,7 @@
 								<IconCircleCheck size={24} class="text-muted-foreground/20" />
 							{/if}
 							<span class="text-[15px] text-foreground">
-								개인정보 처리방침 동의 <span class="text-muted-foreground">(필수)</span>
+								개인정보 수집 및 이용 동의 <span class="text-muted-foreground">(선택)</span>
 							</span>
 						</div>
 						<a
