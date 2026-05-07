@@ -449,39 +449,40 @@
 						</div>
 					</div>
 
-					<label class="flex cursor-pointer items-center justify-between gap-3">
-						<div class="flex items-center gap-3">
-							<input type="checkbox" bind:checked={agreePrivacy} class="sr-only" />
-							{#if agreePrivacy}
-								<IconCircleCheckFilled size={24} class="text-primary" />
+					<div class="space-y-3">
+						<label class="flex cursor-pointer items-center justify-between gap-3">
+							<div class="flex items-center gap-3">
+								<input type="checkbox" bind:checked={agreePrivacy} class="sr-only" />
+								{#if agreePrivacy}
+									<IconCircleCheckFilled size={24} class="text-primary" />
+								{:else}
+									<IconCircleCheck size={24} class="text-muted-foreground/20" />
+								{/if}
+								<span class="text-[15px] text-foreground">
+									개인정보 수집 및 이용 동의 <span class="text-muted-foreground">(선택)</span>
+								</span>
+							</div>
+							<a
+								href="/legal/privacy"
+								target="_blank"
+								rel="noreferrer"
+								class="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+							>
+								보기
+							</a>
+						</label>
+						<label class="flex cursor-pointer items-center gap-3 pl-9">
+							<input type="checkbox" bind:checked={agreeMarketing} class="sr-only" />
+							{#if agreeMarketing}
+								<IconCircleCheckFilled size={20} class="text-primary" />
 							{:else}
-								<IconCircleCheck size={24} class="text-muted-foreground/20" />
+								<IconCircleCheck size={20} class="text-muted-foreground/20" />
 							{/if}
-							<span class="text-[15px] text-foreground">
-								개인정보 수집 및 이용 동의 <span class="text-muted-foreground">(선택)</span>
+							<span class="text-[14px] text-muted-foreground">
+								이벤트, 광고성 정보 안내 <span>(선택)</span>
 							</span>
-						</div>
-						<a
-							href="/legal/privacy"
-							target="_blank"
-							rel="noreferrer"
-							class="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
-						>
-							보기
-						</a>
-					</label>
-
-					<label class="flex cursor-pointer items-center gap-3">
-						<input type="checkbox" bind:checked={agreeMarketing} class="sr-only" />
-						{#if agreeMarketing}
-							<IconCircleCheckFilled size={24} class="text-primary" />
-						{:else}
-							<IconCircleCheck size={24} class="text-muted-foreground/20" />
-						{/if}
-						<span class="text-[15px] text-foreground">
-							마케팅 정보 수신 동의 <span class="text-muted-foreground">(선택)</span>
-						</span>
-					</label>
+						</label>
+					</div>
 
 					{#if consentError}
 						<p class="pt-1 text-xs text-destructive">{consentError}</p>
