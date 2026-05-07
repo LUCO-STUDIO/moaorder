@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { HugeiconsIcon } from '@hugeicons/svelte';
-	import { Mail01Icon } from '@hugeicons/core-free-icons';
+	import { IconMailFilled } from '@tabler/icons-svelte';
 
 	const KAKAO_CLIENT_ID = import.meta.env.VITE_KAKAO_CLIENT_ID ?? '';
 	const REDIRECT_URI = `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/kakao/callback`;
@@ -54,7 +53,7 @@
 				href="/auth/email/login"
 				class="relative flex w-full items-center justify-center rounded-[12px] bg-primary h-12 px-5 text-[17px] font-medium text-primary-foreground transition-all hover:brightness-95 active:scale-[0.99]"
 			>
-				<HugeiconsIcon icon={Mail01Icon} size={24} class="absolute left-5" />
+				<IconMailFilled size={24} class="absolute left-5" />
 				<span>이메일로 시작</span>
 			</a>
 		</div>

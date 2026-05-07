@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Calendar as CalendarPrimitive } from "bits-ui";
-	import { HugeiconsIcon } from '@hugeicons/svelte';
-	import { ArrowRight01Icon } from '@hugeicons/core-free-icons';
+	import { IconChevronRight } from '@tabler/icons-svelte';
 	import { buttonVariants, type ButtonVariant } from "$lib/components/ui/button/index.js";
 	import { cn } from "$lib/utils.js";
 
@@ -17,7 +16,7 @@
 </script>
 
 {#snippet Fallback()}
-	<HugeiconsIcon icon={ArrowRight01Icon} size={16} class={cn(className)} />
+	<IconChevronRight size={16} class={cn(className)} />
 {/snippet}
 
 <CalendarPrimitive.NextButton

@@ -6,8 +6,7 @@
 	import { cn, type WithoutChildrenOrChild } from "$lib/utils.js";
 	import type { ComponentProps } from "svelte";
 	import { Button } from "$lib/components/ui/button/index.js";
-	import { HugeiconsIcon } from '@hugeicons/svelte';
-	import { Cancel01Icon } from '@hugeicons/core-free-icons';
+	import { IconX } from '@tabler/icons-svelte';
 
 	let {
 		ref = $bindable(null),
@@ -39,7 +38,7 @@
 			<DialogPrimitive.Close data-slot="dialog-close">
 				{#snippet child({ props })}
 					<Button variant="ghost" class="absolute top-4 right-4" size="icon-sm" {...props}>
-						<HugeiconsIcon icon={Cancel01Icon} size={16} />
+						<IconX size={16} />
 						<span class="sr-only">Close</span>
 					</Button>
 				{/snippet}
