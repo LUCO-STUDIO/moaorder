@@ -393,7 +393,7 @@
 		{:else}
 			<form
 				onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}
-				class="space-y-[40px]"
+				class="space-y-[24px]"
 			>
 				<div class="space-y-3">
 				<!-- Consents card (BAND style) -->
