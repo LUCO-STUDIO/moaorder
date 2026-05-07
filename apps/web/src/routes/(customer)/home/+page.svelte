@@ -37,11 +37,41 @@
 		remaining_qty: number | null;
 	}
 
+	import { user, fetchMe } from '$lib/stores/auth';
+	import { toast } from 'svelte-sonner';
+
+	const REGIONS = [
+		'서울특별시 강남구',
+		'서울특별시 강동구',
+		'서울특별시 강북구',
+		'서울특별시 마포구',
+		'서울특별시 송파구',
+		'서울특별시 영등포구',
+		'서울특별시 종로구',
+		'경기도 성남시',
+		'경기도 수원시',
+		'경기도 용인시',
+		'대구광역시 동구',
+		'대구광역시 수성구',
+		'대구광역시 중구',
+		'부산광역시 해운대구',
+		'부산광역시 부산진구',
+		'인천광역시 연수구',
+		'대전광역시 유성구',
+		'광주광역시 서구',
+		'울산광역시 남구',
+		'제주특별자치도 제주시'
+	];
+
 	let todayPickups: TodayPickupItem[] = $state([]);
 	let activeOrders: ActiveOrderItem[] = $state([]);
 	let feed: FeedItem[] = $state([]);
 	let loading = $state(true);
 	let error = $state('');
+	let regionPickerOpen = $state(false);
+	let savingRegion = $state(false);
+
+	const currentRegion = $derived($user?.region ?? '');
 
 	function timeUntil(closesAt: string): string {
 		const diff = new Date(closesAt).getTime() - Date.now();
@@ -58,7 +88,7 @@
 		pickup_ready: 'bg-green-100 text-green-700'
 	};
 
-	onMount(async () => {
+	async function loadFeed() {
 		try {
 			[todayPickups, activeOrders, feed] = await Promise.all([
 				api.get<TodayPickupItem[]>('/home/today-pickup'),
@@ -70,18 +100,44 @@
 		} finally {
 			loading = false;
 		}
-	});
+	}
+
+	async function selectRegion(region: string) {
+		savingRegion = true;
+		try {
+			await api.patch('/users/me', { region });
+			await fetchMe();
+			regionPickerOpen = false;
+			toast.success(`${region}으로 설정했어요`);
+			loading = true;
+			await loadFeed();
+		} catch {
+			toast.error('지역 설정에 실패했어요');
+		} finally {
+			savingRegion = false;
+		}
+	}
+
+	onMount(loadFeed);
 </script>
 
 <svelte:head>
 	<title>홈 - 모아오더</title>
 </svelte:head>
 
-<div class="px-4 pt-5 pb-2 flex items-center justify-between">
+<div class="flex items-center justify-between px-4 pt-5 pb-2 md:px-0">
 	<h1 class="text-xl font-bold text-foreground">홈</h1>
+	<button
+		type="button"
+		onclick={() => (regionPickerOpen = true)}
+		class="flex items-center gap-1 rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted/70"
+	>
+		📍
+		<span>{currentRegion || '동네 설정'}</span>
+	</button>
 </div>
 
-<div class="px-4 pb-6 space-y-6">
+<div class="space-y-6 px-4 pb-6 md:px-0">
 	{#if loading}
 		<!-- Skeleton loading -->
 		<div class="space-y-3">
@@ -164,21 +220,44 @@
 			</section>
 		{/if}
 
-		<!-- 구독 매장 공구 피드 -->
+		<!-- 동네 공동구매 피드 -->
 		<section class="space-y-2.5">
-			<h2 class="text-sm font-semibold text-foreground">구독 매장 공구</h2>
+			<div class="flex items-end justify-between">
+				<h2 class="text-sm font-semibold text-foreground">
+					{#if currentRegion}
+						{currentRegion} 공동구매
+					{:else}
+						진행 중인 공동구매
+					{/if}
+				</h2>
+				{#if !currentRegion}
+					<button
+						type="button"
+						onclick={() => (regionPickerOpen = true)}
+						class="text-xs text-primary underline underline-offset-2"
+					>
+						동네 설정하기
+					</button>
+				{/if}
+			</div>
 
 			{#if feed.length === 0}
 				<!-- Empty state -->
 				<div class="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border bg-card py-12 text-center">
 					<div class="text-3xl">🛍️</div>
 					<div class="space-y-1">
-						<p class="text-sm font-medium text-foreground">진행 중인 공구가 없어요</p>
-						<p class="text-xs text-muted-foreground">공구 링크를 통해 주문하면 자동으로 구독돼요</p>
+						<p class="text-sm font-medium text-foreground">
+							{#if currentRegion}
+								{currentRegion}에 진행 중인 공구가 없어요
+							{:else}
+								진행 중인 공구가 없어요
+							{/if}
+						</p>
+						<p class="text-xs text-muted-foreground">조금만 기다려보세요. 새 공구가 곧 열릴 거예요.</p>
 					</div>
 				</div>
 			{:else}
-				<ul class="space-y-3">
+				<ul class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
 					{#each feed as item}
 						<li>
 							<a
@@ -217,3 +296,46 @@
 		</section>
 	{/if}
 </div>
+
+<!-- Region picker -->
+{#if regionPickerOpen}
+	<div
+		class="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center"
+		onclick={(e) => { if (e.target === e.currentTarget) regionPickerOpen = false; }}
+		onkeydown={(e) => { if (e.key === 'Escape') regionPickerOpen = false; }}
+		role="dialog"
+		tabindex="-1"
+		aria-modal="true"
+	>
+		<div class="w-full max-w-md rounded-t-2xl bg-background p-5 sm:rounded-2xl">
+			<div class="mb-3 flex items-center justify-between">
+				<h3 class="text-base font-bold text-foreground">동네 선택</h3>
+				<button
+					type="button"
+					onclick={() => (regionPickerOpen = false)}
+					class="text-xs text-muted-foreground hover:text-foreground"
+				>
+					닫기
+				</button>
+			</div>
+			<p class="mb-3 text-xs text-muted-foreground">선택한 동네의 공동구매가 홈에 보입니다.</p>
+			<ul class="max-h-[60vh] space-y-1 overflow-y-auto">
+				{#each REGIONS as region}
+					<li>
+						<button
+							type="button"
+							disabled={savingRegion}
+							onclick={() => selectRegion(region)}
+							class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm transition-colors hover:bg-muted disabled:opacity-50 {region === currentRegion ? 'bg-primary/10 text-primary font-medium' : 'text-foreground'}"
+						>
+							{region}
+							{#if region === currentRegion}
+								<span class="text-xs">선택됨</span>
+							{/if}
+						</button>
+					</li>
+				{/each}
+			</ul>
+		</div>
+	</div>
+{/if}
