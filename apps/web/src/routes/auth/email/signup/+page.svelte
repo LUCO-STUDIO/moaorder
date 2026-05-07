@@ -145,6 +145,16 @@
 		agreeMarketing = next;
 	}
 
+	function downloadTerms() {
+		const blob = new Blob([termsText.trim()], { type: 'text/plain;charset=utf-8' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = '모아오더_이용약관.txt';
+		a.click();
+		URL.revokeObjectURL(url);
+	}
+
 	function validateFields(): boolean {
 		emailError = '';
 		passwordError = '';
@@ -402,8 +412,19 @@
 								이용약관 동의 <span class="text-muted-foreground">(필수)</span>
 							</span>
 						</label>
-						<div class="max-h-40 overflow-y-auto rounded-[12px] border border-border bg-muted/30 px-4 py-3 text-[12px] leading-relaxed text-muted-foreground whitespace-pre-line">
-							{termsText.trim()}
+						<div class="rounded-[12px] border border-border bg-muted/30">
+							<div class="max-h-40 overflow-y-auto whitespace-pre-line px-4 py-3 text-[12px] leading-relaxed text-muted-foreground">
+								{termsText.trim()}
+							</div>
+							<div class="flex justify-end border-t border-border px-4 py-2">
+								<button
+									type="button"
+									onclick={downloadTerms}
+									class="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+								>
+									다운로드
+								</button>
+							</div>
 						</div>
 					</div>
 
