@@ -65,7 +65,52 @@ async def get_today_pickup(
 async def get_feed(
     current_user: Annotated[User, Depends(get_current_user)],
     db: AsyncSession = Depends(get_db),
+    region: str | None = None,
 ) -> list[FeedItem]:
+    """Open group buys for the user's region.
+
+    Region matching: explicit query param wins, else falls back to
+    `current_user.region`. If neither is set, returns all open groups
+    (discovery mode for new users who haven't picked a region yet).
+    """
+    effective_region = (region or current_user.region or "").strip()
+
+    stmt = (
+        select(Group, Store)
+        .join(Store, Group.store_id == Store.id)
+        .where(
+            Group.status == "open",
+            (Group.remaining_qty.is_(None)) | (Group.remaining_qty > 0),
+        )
+        .order_by(Group.closes_at.asc(), Group.created_at.desc())
+    )
+    if effective_region:
+        stmt = stmt.where(Store.region == effective_region)
+
+    result = await db.execute(stmt)
+
+    return [
+        FeedItem(
+            public_id=group.public_id,
+            group_id=str(group.id),
+            store_id=str(group.store_id),
+            store_name=store.name,
+            product_name=group.product_name,
+            price=group.price,
+            image_url=group.image_url,
+            closes_at=group.closes_at.isoformat(),
+            remaining_qty=group.remaining_qty,
+        )
+        for group, store in result.all()
+    ]
+
+
+@router.get("/feed/subscribed", response_model=list[FeedItem])
+async def get_feed_subscribed(
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: AsyncSession = Depends(get_db),
+) -> list[FeedItem]:
+    """Open group buys from stores the user follows. Used as a 'My subscriptions' section on home."""
     result = await db.execute(
         select(Group, Store)
         .join(Store, Group.store_id == Store.id)
