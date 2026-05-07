@@ -420,7 +420,7 @@
 								이용약관 동의 <span class="text-muted-foreground">(필수)</span>
 							</span>
 						</label>
-						<div class="max-h-40 space-y-3 overflow-y-auto rounded-[12px] border border-border bg-muted/30 px-4 py-3 text-[12px] leading-relaxed text-muted-foreground">
+						<div class="max-h-40 space-y-3 overflow-y-auto rounded-[12px] bg-muted/30 px-4 py-3 text-[12px] leading-relaxed text-muted-foreground">
 							{#each termsBlocks as block}
 								<div>
 									{#if block.body.length > 0}
