@@ -155,6 +155,14 @@
 		URL.revokeObjectURL(url);
 	}
 
+	const termsBlocks = termsText
+		.trim()
+		.split(/\n\s*\n/)
+		.map((block) => {
+			const lines = block.split('\n');
+			return { header: lines[0], body: lines.slice(1) };
+		});
+
 	function validateFields(): boolean {
 		emailError = '';
 		passwordError = '';
@@ -412,11 +420,24 @@
 								이용약관 동의 <span class="text-muted-foreground">(필수)</span>
 							</span>
 						</label>
-						<div class="rounded-[12px] border border-border bg-muted/30">
-							<div class="max-h-40 overflow-y-auto whitespace-pre-line px-4 py-3 text-[12px] leading-relaxed text-muted-foreground">
-								{termsText.trim()}
-							</div>
-							<div class="flex justify-end border-t border-border px-4 py-2">
+						<div class="max-h-40 space-y-3 overflow-y-auto rounded-[12px] border border-border bg-muted/30 px-4 py-3 text-[12px] leading-relaxed text-muted-foreground">
+							{#each termsBlocks as block}
+								<div>
+									{#if block.body.length > 0}
+										<p class="font-semibold text-foreground">{block.header}</p>
+										{#each block.body as line}
+											{#if line.startsWith('- ')}
+												<p class="pl-3">{line}</p>
+											{:else}
+												<p>{line}</p>
+											{/if}
+										{/each}
+									{:else}
+										<p>{block.header}</p>
+									{/if}
+								</div>
+							{/each}
+							<div class="flex justify-end pt-2">
 								<button
 									type="button"
 									onclick={downloadTerms}
