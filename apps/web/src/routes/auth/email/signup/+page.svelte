@@ -323,6 +323,7 @@
 							<PopoverTrigger
 								aria-label="생년월일 선택"
 								disabled={loading}
+								onfocus={() => (birthdatePopoverOpen = true)}
 								class="{inputClass} cursor-pointer items-center text-left {displayBirthdate ? 'text-foreground' : 'text-muted-foreground/40'}"
 							>
 								{displayBirthdate || '생년월일'}
