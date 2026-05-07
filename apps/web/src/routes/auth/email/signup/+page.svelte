@@ -359,7 +359,7 @@
 				class="space-y-[40px]"
 			>
 				<!-- Consents card (BAND style) -->
-				<div class="space-y-4 rounded-2xl border border-border bg-card p-5">
+				<div class="space-y-4 rounded-[16px] border border-border bg-card p-5">
 					<button
 						type="button"
 						onclick={toggleAll}
