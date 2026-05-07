@@ -20,6 +20,7 @@
 	import { Popover, PopoverTrigger, PopoverContent } from '$lib/components/ui/popover';
 	import { Calendar } from '$lib/components/ui/calendar';
 	import { CalendarDate, getLocalTimeZone, today, type DateValue } from '@internationalized/date';
+	import termsText from '$lib/legal/terms.txt?raw';
 
 	type Step = 'fields' | 'consents';
 	let step = $state<Step>(page.url.searchParams.get('step') === 'consents' ? 'consents' : 'fields');
@@ -57,14 +58,25 @@
 	let birthdateError = $state('');
 
 	// Consents
-	let agreeAge = $state(false);
 	let agreeTerms = $state(false);
 	let agreePrivacy = $state(false);
 	let agreeMarketing = $state(false);
 	let consentError = $state('');
 
-	let allRequired = $derived(agreeAge && agreeTerms && agreePrivacy);
+	let allRequired = $derived(agreeTerms && agreePrivacy);
 	let agreeAll = $derived(allRequired && agreeMarketing);
+
+	// Age 14+ derived from birthdate (PIPA §22-2)
+	const isAge14Plus = $derived(() => {
+		if (!birthdateValue) return false;
+		const t = todayDate;
+		let age = t.year - birthdateValue.year;
+		const beforeBirthday =
+			t.month < birthdateValue.month ||
+			(t.month === birthdateValue.month && t.day < birthdateValue.day);
+		if (beforeBirthday) age--;
+		return age >= 14;
+	});
 
 	const isEmailValid = $derived(
 		/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)
@@ -128,7 +140,6 @@
 
 	function toggleAll() {
 		const next = !agreeAll;
-		agreeAge = next;
 		agreeTerms = next;
 		agreePrivacy = next;
 		agreeMarketing = next;
@@ -158,6 +169,9 @@
 		}
 		if (!/^\d{8}$/.test(birthdate)) {
 			birthdateError = '생년월일 8자리를 입력해주세요 (예: 19900101)';
+			ok = false;
+		} else if (!isAge14Plus()) {
+			birthdateError = '만 14세 이상만 가입할 수 있어요';
 			ok = false;
 		}
 		return ok;
@@ -376,20 +390,8 @@
 						</span>
 					</button>
 
-					<label class="flex cursor-pointer items-center gap-3">
-						<input type="checkbox" bind:checked={agreeAge} class="sr-only" />
-						{#if agreeAge}
-							<IconCircleCheckFilled size={24} class="text-primary" />
-						{:else}
-							<IconCircleCheck size={24} class="text-muted-foreground/20" />
-						{/if}
-						<span class="text-[15px] text-foreground">
-							만 14세 이상입니다 <span class="text-muted-foreground">(필수)</span>
-						</span>
-					</label>
-
-					<label class="flex cursor-pointer items-center justify-between gap-3">
-						<div class="flex items-center gap-3">
+					<div class="space-y-3">
+						<label class="flex cursor-pointer items-center gap-3">
 							<input type="checkbox" bind:checked={agreeTerms} class="sr-only" />
 							{#if agreeTerms}
 								<IconCircleCheckFilled size={24} class="text-primary" />
@@ -399,16 +401,11 @@
 							<span class="text-[15px] text-foreground">
 								이용약관 동의 <span class="text-muted-foreground">(필수)</span>
 							</span>
+						</label>
+						<div class="max-h-40 overflow-y-auto rounded-[12px] border border-border bg-muted/30 px-4 py-3 text-[12px] leading-relaxed text-muted-foreground whitespace-pre-line">
+							{termsText}
 						</div>
-						<a
-							href="/legal/terms"
-							target="_blank"
-							rel="noreferrer"
-							class="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
-						>
-							보기
-						</a>
-					</label>
+					</div>
 
 					<label class="flex cursor-pointer items-center justify-between gap-3">
 						<div class="flex items-center gap-3">
