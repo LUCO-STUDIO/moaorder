@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Optional
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import select
@@ -65,7 +65,7 @@ async def get_today_pickup(
 async def get_feed(
     current_user: Annotated[User, Depends(get_current_user)],
     db: AsyncSession = Depends(get_db),
-    region: str | None = None,
+    region: Optional[str] = None,
 ) -> list[FeedItem]:
     """Open group buys for the user's region.
 

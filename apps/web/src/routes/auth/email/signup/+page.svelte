@@ -23,6 +23,7 @@
 	import { CalendarDate, getLocalTimeZone, today, type DateValue } from '@internationalized/date';
 	import termsText from '$lib/legal/terms.txt?raw';
 	import privacyText from '$lib/legal/privacy-collection.txt?raw';
+	import { REGIONS } from '$lib/regions';
 
 	type Step = 'fields' | 'consents';
 	let step = $state<Step>(page.url.searchParams.get('step') === 'consents' ? 'consents' : 'fields');
@@ -34,6 +35,12 @@
 	let birthdate = $state(''); // YYYYMMDD (8 digits)
 	let birthdateValue = $state<DateValue | undefined>(undefined);
 	let birthdatePopoverOpen = $state(false);
+	let region = $state('');
+	let regionPickerOpen = $state(false);
+	let regionSearch = $state('');
+	const filteredRegions = $derived(
+		regionSearch.trim() ? REGIONS.filter((r) => r.includes(regionSearch.trim())) : REGIONS
+	);
 	let loading = $state(false);
 	let showPassword = $state(false);
 
@@ -232,7 +239,8 @@
 			await api.post('/auth/email/signup', {
 				verified_email_token: verifiedEmailToken,
 				password,
-				nickname: name.trim()
+				nickname: name.trim(),
+				region: region || null
 			});
 			const me = await api.get<AuthUser>('/auth/me');
 			setUser(me);
@@ -390,6 +398,19 @@
 							<p class="text-xs text-destructive">{birthdateError}</p>
 						{/if}
 					</div>
+
+					<!-- Region (optional) -->
+					<div class="space-y-1.5">
+						<button
+							type="button"
+							disabled={loading}
+							onclick={() => (regionPickerOpen = true)}
+							aria-label="동네 선택"
+							class="{inputClass} cursor-pointer items-center text-left {region ? 'text-foreground' : 'text-muted-foreground/40'}"
+						>
+							{region || '동네 (선택)'}
+						</button>
+					</div>
 				</div>
 
 				<button type="submit" disabled={loading || !isStep1Valid} class={submitClass}>
@@ -538,3 +559,53 @@
 		{/if}
 	</div>
 </main>
+
+<!-- Region picker -->
+{#if regionPickerOpen}
+	<div
+		class="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center"
+		onclick={(e) => { if (e.target === e.currentTarget) regionPickerOpen = false; }}
+		onkeydown={(e) => { if (e.key === 'Escape') regionPickerOpen = false; }}
+		role="dialog"
+		tabindex="-1"
+		aria-modal="true"
+	>
+		<div class="w-full max-w-md rounded-t-2xl bg-background p-5 sm:rounded-2xl">
+			<div class="mb-3 flex items-center justify-between">
+				<h3 class="text-base font-bold text-foreground">동네 선택</h3>
+				<button
+					type="button"
+					onclick={() => (regionPickerOpen = false)}
+					class="text-xs text-muted-foreground hover:text-foreground"
+				>
+					닫기
+				</button>
+			</div>
+			<input
+				type="search"
+				bind:value={regionSearch}
+				placeholder="동네 검색 (예: 강남, 성남)"
+				class="mb-3 h-10 w-full rounded-lg border border-input bg-transparent px-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+			/>
+			<ul class="max-h-[60vh] space-y-1 overflow-y-auto">
+				{#if filteredRegions.length === 0}
+					<li class="px-3 py-4 text-center text-xs text-muted-foreground">검색 결과가 없습니다.</li>
+				{/if}
+				{#each filteredRegions as r}
+					<li>
+						<button
+							type="button"
+							onclick={() => { region = r; regionPickerOpen = false; regionSearch = ''; }}
+							class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm transition-colors hover:bg-muted {r === region ? 'bg-primary/10 text-primary font-medium' : 'text-foreground'}"
+						>
+							{r}
+							{#if r === region}
+								<span class="text-xs">선택됨</span>
+							{/if}
+						</button>
+					</li>
+				{/each}
+			</ul>
+		</div>
+	</div>
+{/if}

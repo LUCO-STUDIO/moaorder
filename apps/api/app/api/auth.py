@@ -115,6 +115,7 @@ async def kakao_complete_signup(
             kakao_id=kakao_id,
             role="customer",
             nickname=body.name.strip(),
+            region=body.region.strip() if body.region else None,
         )
         db.add(user)
         await db.commit()
