@@ -236,7 +236,7 @@
 			});
 			const me = await api.get<AuthUser>('/auth/me');
 			setUser(me);
-			toast.success('회원가입이 완료됐어요. 이메일 인증 링크를 확인해주세요.');
+			toast.success('회원가입이 완료됐어요!');
 			if (me.role === 'owner') {
 				goto('/owner');
 			} else {
