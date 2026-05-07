@@ -5,6 +5,21 @@
 	import { api } from '$lib/api';
 	import { fetchMe } from '$lib/stores/auth';
 
+	type RegisteredResponse = {
+		status: 'registered';
+		user_id: string;
+		role: string;
+	};
+
+	type NeedsSignupResponse = {
+		status: 'needs_signup';
+		signup_token: string;
+		nickname: string | null;
+		profile_image: string | null;
+	};
+
+	type ExchangeResponse = RegisteredResponse | NeedsSignupResponse;
+
 	let error = $state('');
 
 	onMount(async () => {
@@ -15,19 +30,19 @@
 		}
 
 		try {
-			const result = await api.post<{ user_id: string; role: string; is_new: boolean }>(
-				'/auth/kakao/exchange',
-				{ code }
-			);
+			const result = await api.post<ExchangeResponse>('/auth/kakao/exchange', { code });
+
+			if (result.status === 'needs_signup') {
+				const params = new URLSearchParams({ signup_token: result.signup_token });
+				if (result.nickname) params.set('nickname', result.nickname);
+				if (result.profile_image) params.set('profile_image', result.profile_image);
+				goto(`/auth/kakao/signup?${params.toString()}`);
+				return;
+			}
 
 			const user = await fetchMe();
 			if (!user) {
 				error = '사용자 정보를 가져올 수 없습니다';
-				return;
-			}
-
-			if (result.is_new) {
-				goto('/onboarding/customer');
 				return;
 			}
 
@@ -36,7 +51,7 @@
 			} else {
 				goto('/');
 			}
-		} catch (err) {
+		} catch {
 			error = '로그인에 실패했습니다. 다시 시도해주세요.';
 		}
 	});

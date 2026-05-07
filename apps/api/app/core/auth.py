@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import secrets
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Annotated, Optional
@@ -12,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.password import hash_password, verify_password
 from app.models.store import StoreMember
 from app.models.user import User
 
@@ -66,6 +68,117 @@ def verify_email_token(token: str, expected_purpose: str) -> dict:
     except JWTError as exc:
         raise HTTPException(status_code=400, detail="유효하지 않거나 만료된 토큰입니다") from exc
     if payload.get("purpose") != expected_purpose:
+        raise HTTPException(status_code=400, detail="올바르지 않은 토큰 용도입니다")
+    return payload
+
+
+# --- Email verification code (inline at signup) ---
+
+
+def generate_email_verification_code() -> str:
+    """Return a 6-digit numeric code (zero-padded)."""
+    return f"{secrets.randbelow(1_000_000):06d}"
+
+
+def create_email_code_session_token(email: str, code: str) -> str:
+    """Issue a 5-minute JWT carrying the bcrypt-hashed verification code.
+
+    The code goes to the user via email; the JWT goes to the client. Both are
+    submitted back to /verify-code, where the hash is checked. The code is
+    never stored server-side, and an attacker who intercepts only the JWT
+    can't recover the code without breaking bcrypt.
+    """
+    expire = datetime.now(timezone.utc) + timedelta(minutes=5)
+    payload = {
+        "email": email,
+        "code_hash": hash_password(code),
+        "purpose": "email_code_session",
+        "exp": expire,
+    }
+    return jwt.encode(payload, settings.JWT_SECRET, algorithm=ALGORITHM)
+
+
+def verify_email_code_session(token: str, code: str) -> str:
+    """Verify a code-session JWT and the user-supplied code.
+
+    Returns the email claim on success, raises HTTPException otherwise.
+    """
+    try:
+        payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[ALGORITHM])
+    except JWTError as exc:
+        raise HTTPException(
+            status_code=400, detail="유효하지 않거나 만료된 인증 세션입니다"
+        ) from exc
+    if payload.get("purpose") != "email_code_session":
+        raise HTTPException(status_code=400, detail="올바르지 않은 토큰 용도입니다")
+    code_hash = payload.get("code_hash")
+    email = payload.get("email")
+    if not code_hash or not email:
+        raise HTTPException(status_code=400, detail="잘못된 인증 세션입니다")
+    if not verify_password(code, code_hash):
+        raise HTTPException(status_code=400, detail="인증번호가 일치하지 않습니다")
+    return email
+
+
+def create_email_verified_token(email: str) -> str:
+    """JWT proving the email was verified within the last 15 minutes."""
+    expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    payload = {
+        "email": email,
+        "purpose": "email_verified",
+        "exp": expire,
+    }
+    return jwt.encode(payload, settings.JWT_SECRET, algorithm=ALGORITHM)
+
+
+def verify_email_verified_token(token: str) -> str:
+    """Return the verified email or raise."""
+    try:
+        payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[ALGORITHM])
+    except JWTError as exc:
+        raise HTTPException(
+            status_code=400, detail="유효하지 않거나 만료된 인증 토큰입니다"
+        ) from exc
+    if payload.get("purpose") != "email_verified":
+        raise HTTPException(status_code=400, detail="올바르지 않은 토큰 용도입니다")
+    email = payload.get("email")
+    if not email:
+        raise HTTPException(status_code=400, detail="잘못된 인증 토큰입니다")
+    return email
+
+
+# --- Kakao signup token (short-lived, post-OAuth pre-consent) ---
+
+
+def create_kakao_signup_token(
+    kakao_id: str,
+    nickname: Optional[str],
+    profile_image: Optional[str],
+) -> str:
+    """Issue a short-lived JWT carrying the verified Kakao profile.
+
+    Used between Kakao OAuth callback and the consent screen, so the user
+    can complete signup (terms + birthdate) without re-authenticating.
+    """
+    expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    payload = {
+        "kakao_id": kakao_id,
+        "nickname": nickname,
+        "profile_image": profile_image,
+        "purpose": "kakao_signup",
+        "exp": expire,
+    }
+    return jwt.encode(payload, settings.JWT_SECRET, algorithm=ALGORITHM)
+
+
+def verify_kakao_signup_token(token: str) -> dict:
+    try:
+        payload = jwt.decode(token, settings.JWT_SECRET, algorithms=[ALGORITHM])
+    except JWTError as exc:
+        raise HTTPException(
+            status_code=400, detail="유효하지 않거나 만료된 가입 토큰입니다"
+        ) from exc
+    if payload.get("purpose") != "kakao_signup":
         raise HTTPException(status_code=400, detail="올바르지 않은 토큰 용도입니다")
     return payload
 

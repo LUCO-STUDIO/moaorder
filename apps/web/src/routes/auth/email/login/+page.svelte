@@ -83,7 +83,7 @@
 	const headerTitle = $derived(step === 'email' ? '이메일로 시작' : '비밀번호 입력');
 
 	function goToSignup() {
-		goto(`/auth/email/signup?email=${encodeURIComponent(email)}`);
+		goto(`/auth/email/verify-email?email=${encodeURIComponent(email)}`);
 	}
 
 	async function handleLogin() {
