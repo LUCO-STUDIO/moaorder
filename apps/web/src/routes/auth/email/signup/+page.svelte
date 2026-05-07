@@ -366,9 +366,9 @@
 						class="flex w-full cursor-pointer items-center gap-3 text-left"
 					>
 						{#if agreeAll}
-							<IconCircleCheckFilled size={22} class="text-primary" />
+							<IconCircleCheckFilled size={24} class="text-primary" />
 						{:else}
-							<IconCircleCheck size={22} class="text-muted-foreground/40" />
+							<IconCircleCheck size={24} class="text-muted-foreground/20" />
 						{/if}
 						<span class="text-[15px] text-foreground">
 							<span class="font-bold">전체동의</span>
@@ -379,9 +379,9 @@
 					<label class="flex cursor-pointer items-center gap-3">
 						<input type="checkbox" bind:checked={agreeAge} class="sr-only" />
 						{#if agreeAge}
-							<IconCircleCheckFilled size={22} class="text-primary" />
+							<IconCircleCheckFilled size={24} class="text-primary" />
 						{:else}
-							<IconCircleCheck size={22} class="text-muted-foreground/40" />
+							<IconCircleCheck size={24} class="text-muted-foreground/20" />
 						{/if}
 						<span class="text-[15px] text-foreground">
 							만 14세 이상입니다 <span class="text-muted-foreground">(필수)</span>
@@ -392,9 +392,9 @@
 						<div class="flex items-center gap-3">
 							<input type="checkbox" bind:checked={agreeTerms} class="sr-only" />
 							{#if agreeTerms}
-								<IconCircleCheckFilled size={22} class="text-primary" />
+								<IconCircleCheckFilled size={24} class="text-primary" />
 							{:else}
-								<IconCircleCheck size={22} class="text-muted-foreground/40" />
+								<IconCircleCheck size={24} class="text-muted-foreground/20" />
 							{/if}
 							<span class="text-[15px] text-foreground">
 								이용약관 동의 <span class="text-muted-foreground">(필수)</span>
@@ -414,9 +414,9 @@
 						<div class="flex items-center gap-3">
 							<input type="checkbox" bind:checked={agreePrivacy} class="sr-only" />
 							{#if agreePrivacy}
-								<IconCircleCheckFilled size={22} class="text-primary" />
+								<IconCircleCheckFilled size={24} class="text-primary" />
 							{:else}
-								<IconCircleCheck size={22} class="text-muted-foreground/40" />
+								<IconCircleCheck size={24} class="text-muted-foreground/20" />
 							{/if}
 							<span class="text-[15px] text-foreground">
 								개인정보 처리방침 동의 <span class="text-muted-foreground">(필수)</span>
@@ -435,9 +435,9 @@
 					<label class="flex cursor-pointer items-center gap-3">
 						<input type="checkbox" bind:checked={agreeMarketing} class="sr-only" />
 						{#if agreeMarketing}
-							<IconCircleCheckFilled size={22} class="text-primary" />
+							<IconCircleCheckFilled size={24} class="text-primary" />
 						{:else}
-							<IconCircleCheck size={22} class="text-muted-foreground/40" />
+							<IconCircleCheck size={24} class="text-muted-foreground/20" />
 						{/if}
 						<span class="text-[15px] text-foreground">
 							마케팅 정보 수신 동의 <span class="text-muted-foreground">(선택)</span>
