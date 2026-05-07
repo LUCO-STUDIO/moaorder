@@ -22,6 +22,7 @@
 	import { Calendar } from '$lib/components/ui/calendar';
 	import { CalendarDate, getLocalTimeZone, today, type DateValue } from '@internationalized/date';
 	import termsText from '$lib/legal/terms.txt?raw';
+	import privacyText from '$lib/legal/privacy-collection.txt?raw';
 
 	type Step = 'fields' | 'consents';
 	let step = $state<Step>(page.url.searchParams.get('step') === 'consents' ? 'consents' : 'fields');
@@ -144,23 +145,28 @@
 		agreePrivacy = next;
 	}
 
-	function downloadTerms() {
-		const blob = new Blob([termsText.trim()], { type: 'text/plain;charset=utf-8' });
+	function downloadFile(content: string, filename: string) {
+		const blob = new Blob([content.trim()], { type: 'text/plain;charset=utf-8' });
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
 		a.href = url;
-		a.download = '모아오더_이용약관.txt';
+		a.download = filename;
 		a.click();
 		URL.revokeObjectURL(url);
 	}
 
-	const termsBlocks = termsText
-		.trim()
-		.split(/\n\s*\n/)
-		.map((block) => {
-			const lines = block.split('\n');
-			return { header: lines[0], body: lines.slice(1) };
-		});
+	function parseBlocks(text: string) {
+		return text
+			.trim()
+			.split(/\n\s*\n/)
+			.map((block) => {
+				const lines = block.split('\n');
+				return { header: lines[0], body: lines.slice(1) };
+			});
+	}
+
+	const termsBlocks = parseBlocks(termsText);
+	const privacyBlocks = parseBlocks(privacyText);
 
 	function validateFields(): boolean {
 		emailError = '';
@@ -449,28 +455,19 @@
 					</div>
 
 					<div class="space-y-3">
-						<label class="flex cursor-pointer items-center justify-between gap-3">
-							<div class="flex items-center gap-3">
-								<input type="checkbox" bind:checked={agreePrivacy} class="sr-only" />
-								{#if agreePrivacy}
-									<IconCircleCheckFilled size={24} class="text-primary" />
-								{:else}
-									<IconCircleCheck size={24} class="text-muted-foreground/20" />
-								{/if}
-								<span class="text-[15px] text-foreground">
-									개인정보 수집 및 이용 동의 <span class="text-muted-foreground">(선택)</span>
-								</span>
-							</div>
-							<a
-								href="/legal/privacy"
-								target="_blank"
-								rel="noreferrer"
-								class="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
-							>
-								보기
-							</a>
+						<label class="flex cursor-pointer items-center gap-3">
+							<input type="checkbox" bind:checked={agreePrivacy} class="sr-only" />
+							{#if agreePrivacy}
+								<IconCircleCheckFilled size={24} class="text-primary" />
+							{:else}
+								<IconCircleCheck size={24} class="text-muted-foreground/20" />
+							{/if}
+							<span class="text-[15px] text-foreground">
+								개인정보 수집 및 이용 동의 <span class="text-muted-foreground">(선택)</span>
+							</span>
 						</label>
-						<div class="flex items-center gap-3 pl-9">
+						<label class="flex cursor-pointer items-center gap-3 pl-9">
+							<input type="checkbox" bind:checked={agreePrivacy} class="sr-only" />
 							<IconCheck
 								size={16}
 								stroke={2.5}
@@ -479,12 +476,44 @@
 							<span class="text-[13px] text-muted-foreground">
 								이벤트, 광고성 정보 안내 (선택)
 							</span>
-						</div>
+						</label>
 					</div>
 
 					{#if consentError}
 						<p class="pt-1 text-xs text-destructive">{consentError}</p>
 					{/if}
+				</div>
+
+				<!-- Privacy collection notice card -->
+				<div class="space-y-3 rounded-[16px] border border-border bg-card p-5">
+					<p class="text-[15px] font-bold text-foreground">개인정보 수집 및 이용 안내</p>
+					<div class="max-h-40 space-y-3 overflow-y-auto bg-muted/30 px-4 py-3 text-[12px] leading-relaxed text-muted-foreground">
+						{#each privacyBlocks as block}
+							<div>
+								{#if block.body.length > 0}
+									<p class="font-semibold text-foreground">{block.header}</p>
+									{#each block.body as line}
+										{#if line.startsWith('- ')}
+											<p class="pl-3">{line}</p>
+										{:else}
+											<p>{line}</p>
+										{/if}
+									{/each}
+								{:else}
+									<p>{block.header}</p>
+								{/if}
+							</div>
+						{/each}
+						<div class="flex justify-end pt-2">
+							<button
+								type="button"
+								onclick={() => downloadFile(privacyText, '모아오더_개인정보_수집_및_이용_안내.txt')}
+								class="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+							>
+								다운로드
+							</button>
+						</div>
+					</div>
 				</div>
 
 				<button type="submit" disabled={loading || !allRequired} aria-busy={loading} class={submitClass}>
