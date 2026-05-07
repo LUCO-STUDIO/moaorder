@@ -475,7 +475,7 @@
 						<label class="flex cursor-pointer items-center gap-3 pl-9">
 							<input type="checkbox" bind:checked={agreeMarketing} class="sr-only" />
 							<IconCheck
-								size={18}
+								size={16}
 								stroke={2.5}
 								class={agreeMarketing ? 'text-primary' : 'text-muted-foreground/30'}
 							/>
