@@ -41,6 +41,7 @@
 	import { toast } from 'svelte-sonner';
 
 	import { REGIONS } from '$lib/regions';
+	import { CATEGORIES } from '$lib/categories';
 
 	let todayPickups: TodayPickupItem[] = $state([]);
 	let activeOrders: ActiveOrderItem[] = $state([]);
@@ -51,6 +52,7 @@
 	let regionPickerOpen = $state(false);
 	let savingRegion = $state(false);
 	let regionSearch = $state('');
+	let activeCategory = $state<string | null>(null);
 
 	const currentRegion = $derived($user?.region ?? '');
 	const filteredRegions = $derived(
@@ -81,10 +83,13 @@
 
 	async function loadFeed() {
 		try {
+			const params = new URLSearchParams();
+			if (activeCategory) params.set('category', activeCategory);
+			const feedQuery = params.toString() ? `/home/feed?${params}` : '/home/feed';
 			[todayPickups, activeOrders, feed, subscribedFeed] = await Promise.all([
 				api.get<TodayPickupItem[]>('/home/today-pickup'),
 				api.get<ActiveOrderItem[]>('/home/my-orders-active'),
-				api.get<FeedItem[]>('/home/feed'),
+				api.get<FeedItem[]>(feedQuery),
 				api.get<FeedItem[]>('/home/feed/subscribed')
 			]);
 		} catch {
@@ -92,6 +97,16 @@
 		} finally {
 			loading = false;
 		}
+	}
+
+	async function selectCategory(value: string | null) {
+		if (activeCategory === value) {
+			activeCategory = null;
+		} else {
+			activeCategory = value;
+		}
+		loading = true;
+		await loadFeed();
 	}
 
 	async function selectRegion(region: string) {
@@ -248,6 +263,36 @@
 			</section>
 		{/if}
 
+		<!-- 카테고리 칩 -->
+		<section class="space-y-2.5">
+			<div class="-mx-4 overflow-x-auto px-4 md:mx-0 md:overflow-visible md:px-0">
+				<ul class="flex gap-2 whitespace-nowrap md:flex-wrap">
+					<li>
+						<button
+							type="button"
+							onclick={() => selectCategory(null)}
+							class="flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors {activeCategory === null ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-background text-muted-foreground hover:bg-muted'}"
+						>
+							전체
+						</button>
+					</li>
+					{#each CATEGORIES as cat}
+						{@const active = activeCategory === cat.value}
+						<li>
+							<button
+								type="button"
+								onclick={() => selectCategory(cat.value)}
+								class="flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors {active ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-background text-muted-foreground hover:bg-muted'}"
+							>
+								<span aria-hidden="true">{cat.emoji}</span>
+								{cat.label}
+							</button>
+						</li>
+					{/each}
+				</ul>
+			</div>
+		</section>
+
 		<!-- 동네 공동구매 피드 -->
 		<section class="space-y-2.5">
 			<div class="flex items-end justify-between">
@@ -256,6 +301,12 @@
 						{currentRegion} 공동구매
 					{:else}
 						진행 중인 공동구매
+					{/if}
+					{#if activeCategory}
+						{@const cat = CATEGORIES.find((c) => c.value === activeCategory)}
+						{#if cat}
+							<span class="text-muted-foreground"> · {cat.label}</span>
+						{/if}
 					{/if}
 				</h2>
 				{#if !currentRegion}

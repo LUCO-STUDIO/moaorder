@@ -66,14 +66,16 @@ async def get_feed(
     current_user: Annotated[User, Depends(get_current_user)],
     db: AsyncSession = Depends(get_db),
     region: Optional[str] = None,
+    category: Optional[str] = None,
 ) -> list[FeedItem]:
-    """Open group buys for the user's region.
+    """Open group buys, optionally narrowed by region and store category.
 
-    Region matching: explicit query param wins, else falls back to
-    `current_user.region`. If neither is set, returns all open groups
-    (discovery mode for new users who haven't picked a region yet).
+    Region: explicit query param wins, else falls back to
+    `current_user.region`. If neither is set, returns groups from any region.
+    Category: filters by Store.category if provided. Both filters compose.
     """
     effective_region = (region or current_user.region or "").strip()
+    effective_category = (category or "").strip()
 
     stmt = (
         select(Group, Store)
@@ -86,6 +88,8 @@ async def get_feed(
     )
     if effective_region:
         stmt = stmt.where(Store.region == effective_region)
+    if effective_category:
+        stmt = stmt.where(Store.category == effective_category)
 
     result = await db.execute(stmt)
 
