@@ -479,7 +479,7 @@
 								stroke={2.5}
 								class={agreeMarketing ? 'text-primary' : 'text-muted-foreground/30'}
 							/>
-							<span class="text-[14px] text-muted-foreground">
+							<span class="text-[11px] text-muted-foreground">
 								이벤트, 광고성 정보 안내 <span>(선택)</span>
 							</span>
 						</label>
