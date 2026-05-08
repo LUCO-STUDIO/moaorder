@@ -142,19 +142,19 @@
 	<title>홈 - 모아오더</title>
 </svelte:head>
 
-<div class="flex items-center justify-between px-4 pt-5 pb-2 md:px-0">
-	<h1 class="text-xl font-bold text-foreground">홈</h1>
+<div class="flex items-center justify-between px-4 pt-6 pb-3 md:px-0 md:pt-8">
+	<h1 class="text-[24px] font-black tracking-[-0.03em] text-foreground sm:text-[28px]">홈</h1>
 	<button
 		type="button"
 		onclick={() => (regionPickerOpen = true)}
-		class="flex items-center gap-1 rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted/70"
+		class="flex items-center gap-1.5 rounded-full bg-card px-3.5 py-2 text-[13px] font-semibold text-foreground ring-1 ring-border transition-all hover:bg-muted active:scale-[0.97]"
 	>
-		📍
+		<span aria-hidden="true">📍</span>
 		<span>{currentRegion || '동네 설정'}</span>
 	</button>
 </div>
 
-<div class="space-y-6 px-4 pb-6 md:px-0">
+<div class="space-y-10 px-4 pb-8 md:px-0 md:space-y-12">
 	{#if loading}
 		<!-- Skeleton loading -->
 		<div class="space-y-3">
@@ -184,8 +184,8 @@
 	{:else}
 		<!-- 오늘 수령 예정 -->
 		{#if todayPickups.length > 0}
-			<section class="space-y-2.5">
-				<h2 class="text-sm font-semibold text-foreground">오늘 수령 예정</h2>
+			<section class="space-y-3 sm:space-y-4">
+				<h2 class="text-[17px] font-bold tracking-[-0.02em] text-foreground sm:text-[20px]">오늘 수령 예정</h2>
 				<ul class="space-y-2">
 					{#each todayPickups as item}
 						<li>
@@ -209,8 +209,8 @@
 
 		<!-- 진행 중 주문 -->
 		{#if activeOrders.length > 0}
-			<section class="space-y-2.5">
-				<h2 class="text-sm font-semibold text-foreground">진행 중 주문</h2>
+			<section class="space-y-3 sm:space-y-4">
+				<h2 class="text-[17px] font-bold tracking-[-0.02em] text-foreground sm:text-[20px]">진행 중 주문</h2>
 				<ul class="space-y-2">
 					{#each activeOrders as order}
 						<li>
@@ -239,8 +239,8 @@
 
 		<!-- 내 구독 매장 공구 -->
 		{#if subscribedFeed.length > 0}
-			<section class="space-y-2.5">
-				<h2 class="text-sm font-semibold text-foreground">내 구독 매장 공구</h2>
+			<section class="space-y-3 sm:space-y-4">
+				<h2 class="text-[17px] font-bold tracking-[-0.02em] text-foreground sm:text-[20px]">내 구독 매장 공구</h2>
 				<ul class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
 					{#each subscribedFeed as item}
 						<li>
@@ -274,7 +274,7 @@
 		{/if}
 
 		<!-- 카테고리 칩 -->
-		<section class="space-y-2.5">
+		<section class="space-y-3 sm:space-y-4">
 			<div class="-mx-4 overflow-x-auto px-4 md:mx-0 md:overflow-visible md:px-0">
 				<ul class="flex gap-2 whitespace-nowrap md:flex-wrap">
 					<li>
@@ -304,9 +304,9 @@
 		</section>
 
 		<!-- 동네 공동구매 피드 -->
-		<section class="space-y-2.5">
+		<section class="space-y-3 sm:space-y-4">
 			<div class="flex items-end justify-between">
-				<h2 class="text-sm font-semibold text-foreground">
+				<h2 class="text-[17px] font-bold tracking-[-0.02em] text-foreground sm:text-[20px]">
 					{#if currentRegion}
 						{currentRegion} 공동구매
 					{:else}
