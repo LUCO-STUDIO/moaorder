@@ -16,7 +16,8 @@
 		IconShieldCheckFilled,
 		IconCircleCheck,
 		IconCircleCheckFilled,
-		IconCheck
+		IconCheck,
+		IconChevronLeft
 	} from '@tabler/icons-svelte';
 	import { Popover, PopoverTrigger, PopoverContent } from '$lib/components/ui/popover';
 	import { Calendar } from '$lib/components/ui/calendar';
@@ -25,11 +26,14 @@
 	import privacyText from '$lib/legal/privacy-collection.txt?raw';
 	import { REGIONS } from '$lib/regions';
 
-	type Step = 'fields' | 'consents';
-	let step = $state<Step>(page.url.searchParams.get('step') === 'consents' ? 'consents' : 'fields');
+	type Step = 'password' | 'name' | 'birthdate' | 'region' | 'consents';
+	const STEP_ORDER: Step[] = ['password', 'name', 'birthdate', 'region', 'consents'];
+	let step = $state<Step>('password');
+	const stepIndex = $derived(STEP_ORDER.indexOf(step));
 
-	let email = $state(page.url.searchParams.get('email') ?? '');
+	const email = page.url.searchParams.get('email') ?? '';
 	const verifiedEmailToken = page.url.searchParams.get('verified_email_token') ?? '';
+
 	let password = $state('');
 	let name = $state('');
 	let birthdate = $state(''); // YYYYMMDD (8 digits)
@@ -62,35 +66,25 @@
 			: ''
 	);
 
-	let emailError = $state('');
-	let passwordError = $state('');
-	let nameError = $state('');
-	let birthdateError = $state('');
-	let regionError = $state('');
-
 	// Consents
 	let agreeTerms = $state(false);
 	let agreePrivacy = $state(false);
 	let consentError = $state('');
 
-	let allRequired = $derived(agreeTerms);
-	let agreeAll = $derived(allRequired && agreePrivacy);
+	const allRequired = $derived(agreeTerms);
+	const agreeAll = $derived(allRequired && agreePrivacy);
 
 	// Age 14+ derived from birthdate (PIPA §22-2)
 	const isAge14Plus = $derived(() => {
 		if (!birthdateValue) return false;
-		const t = todayDate;
-		let age = t.year - birthdateValue.year;
+		let age = todayDate.year - birthdateValue.year;
 		const beforeBirthday =
-			t.month < birthdateValue.month ||
-			(t.month === birthdateValue.month && t.day < birthdateValue.day);
+			todayDate.month < birthdateValue.month ||
+			(todayDate.month === birthdateValue.month && todayDate.day < birthdateValue.day);
 		if (beforeBirthday) age--;
 		return age >= 14;
 	});
 
-	const isEmailValid = $derived(
-		/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)
-	);
 	const isPasswordValid = $derived(
 		password.length >= 8 &&
 			password.length <= 16 &&
@@ -99,9 +93,21 @@
 	const isNameValid = $derived(name.trim().length > 0);
 	const isBirthdateValid = $derived(/^\d{8}$/.test(birthdate));
 	const isRegionValid = $derived(region.length > 0);
-	const isStep1Valid = $derived(
-		isEmailValid && isPasswordValid && isNameValid && isBirthdateValid && isRegionValid
-	);
+
+	const canAdvance = $derived(() => {
+		switch (step) {
+			case 'password':
+				return isPasswordValid;
+			case 'name':
+				return isNameValid;
+			case 'birthdate':
+				return isBirthdateValid && isAge14Plus();
+			case 'region':
+				return isRegionValid;
+			case 'consents':
+				return allRequired;
+		}
+	});
 
 	type PasswordStrength = 'unusable' | 'weak' | 'medium' | 'safe';
 	const passwordStrength = $derived<PasswordStrength | null>(
@@ -147,7 +153,8 @@
 		safe: IconShieldCheckFilled
 	} as const;
 
-	let emailInput: HTMLInputElement | null = $state(null);
+	let passwordInput: HTMLInputElement | null = $state(null);
+	let nameInput: HTMLInputElement | null = $state(null);
 
 	// Leave-confirm: warn the user before any navigation away from the signup
 	// page if they have started filling the form. The verify-email step
@@ -172,7 +179,7 @@
 		if (nav.to?.url.pathname === page.url.pathname) return;
 		nav.cancel();
 		pendingLeaveAction = () => {
-			submittedSuccessfully = true; // bypass the dirty check on retry
+			submittedSuccessfully = true;
 			if (nav.to) goto(nav.to.url.toString());
 		};
 		leaveConfirmOpen = true;
@@ -185,6 +192,8 @@
 			e.returnValue = '';
 		};
 		window.addEventListener('beforeunload', handler);
+		// focus password input on initial mount
+		tick().then(() => passwordInput?.focus());
 		return () => window.removeEventListener('beforeunload', handler);
 	});
 
@@ -229,72 +238,49 @@
 	const termsBlocks = parseBlocks(termsText);
 	const privacyBlocks = parseBlocks(privacyText);
 
-	function validateFields(): boolean {
-		emailError = '';
-		passwordError = '';
-		nameError = '';
-		birthdateError = '';
-		let ok = true;
-
-		if (!email || !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
-			emailError = '유효한 이메일 주소를 입력해주세요';
-			ok = false;
+	async function goNext() {
+		if (!canAdvance()) return;
+		if (step === 'consents') {
+			await handleSubmit();
+			return;
 		}
-		if (password.length < 8 || password.length > 16) {
-			passwordError = '비밀번호는 8~16자여야 합니다';
-			ok = false;
-		} else if (!/(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};:'",.<>/?\\|`~])/.test(password)) {
-			passwordError = '영문, 숫자, 특수문자를 모두 포함해야 합니다';
-			ok = false;
-		}
-		if (!name.trim()) {
-			nameError = '이름을 입력해주세요';
-			ok = false;
-		}
-		if (!/^\d{8}$/.test(birthdate)) {
-			birthdateError = '생년월일 8자리를 입력해주세요 (예: 19900101)';
-			ok = false;
-		} else if (!isAge14Plus()) {
-			birthdateError = '만 14세 이상만 가입할 수 있어요';
-			ok = false;
-		}
-		if (!region) {
-			regionError = '동네를 선택해주세요';
-			ok = false;
-		} else {
-			regionError = '';
-		}
-		return ok;
+		const next = STEP_ORDER[stepIndex + 1];
+		if (!next) return;
+		step = next;
+		await tick();
+		focusForStep(step);
 	}
 
-	async function handleNext() {
-		if (!validateFields()) return;
-		step = 'consents';
-		await tick();
-		window.scrollTo({ top: 0 });
+	function goBack() {
+		if (stepIndex > 0) {
+			const prev = STEP_ORDER[stepIndex - 1];
+			step = prev;
+			tick().then(() => focusForStep(step));
+			return;
+		}
+		// First step — leave the page entirely (will trigger leave-confirm if dirty).
+		history.back();
 	}
 
-	async function handleBack() {
-		step = 'fields';
-		await tick();
-		window.scrollTo({ top: 0 });
+	function focusForStep(s: Step) {
+		if (s === 'password') passwordInput?.focus();
+		else if (s === 'name') nameInput?.focus();
 	}
 
 	async function handleSubmit() {
 		consentError = '';
 		if (!allRequired) {
-			consentError = '필수 항목에 모두 동의해주세요';
+			consentError = '필수 항목에 동의해주세요';
+			return;
+		}
+		if (!verifiedEmailToken) {
+			toast.error('이메일 인증 세션이 만료되었어요. 다시 진행해주세요.');
+			submittedSuccessfully = true;
+			goto(`/auth/email/verify-email?email=${encodeURIComponent(email)}`);
 			return;
 		}
 		loading = true;
 		try {
-			// Backend currently accepts: email, password, nickname
-			// TODO: extend to send name, birthdate, consents (marketing) once API supports
-			if (!verifiedEmailToken) {
-				toast.error('이메일 인증 세션이 만료되었어요. 다시 진행해주세요.');
-				goto(`/auth/email/verify-email?email=${encodeURIComponent(email)}`);
-				return;
-			}
 			await api.post('/auth/email/signup', {
 				verified_email_token: verifiedEmailToken,
 				password,
@@ -314,54 +300,66 @@
 	}
 
 	const inputClass =
-		'flex h-11 w-full appearance-none items-center border-0 border-b border-input bg-transparent px-0 py-0 text-[22px] font-light leading-none tracking-[-0.22px] placeholder:text-muted-foreground/40 focus:border-primary focus:outline-none focus:ring-0 disabled:opacity-50';
-	const submitClass =
-		'relative flex h-12 w-full cursor-pointer items-center justify-center rounded-xl bg-primary px-5 text-[17px] font-medium text-primary-foreground transition-all hover:brightness-95 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:brightness-100';
+		'flex h-14 w-full appearance-none items-center border-0 border-b-2 border-input bg-transparent px-0 py-0 text-[26px] font-light leading-none tracking-[-0.27px] placeholder:text-muted-foreground/40 focus:border-primary focus:outline-none focus:ring-0 disabled:opacity-50';
+	const ctaClass =
+		'relative flex h-14 w-full cursor-pointer items-center justify-center rounded-xl bg-primary px-5 text-[17px] font-bold text-primary-foreground transition-all hover:brightness-95 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:brightness-100';
+
+	const stepTitles: Record<Step, string> = {
+		password: '비밀번호를 만들어 주세요',
+		name: '이름을 알려 주세요',
+		birthdate: '생년월일을 알려 주세요',
+		region: '어느 동네인가요?',
+		consents: '약관에 동의해 주세요'
+	};
+	const stepSubtitles: Record<Step, string> = {
+		password: `${email} 계정으로 가입해요`,
+		name: '주문 내역과 알림에 사용해요',
+		birthdate: '만 14세 이상부터 가입할 수 있어요',
+		region: '내 동네의 공동구매가 홈에 보여요',
+		consents: '서비스 이용을 위한 안내를 확인하세요'
+	};
 </script>
 
 <svelte:head>
 	<title>회원가입 - 모아오더</title>
 </svelte:head>
 
-<!-- Header: desktop only — wordmark with BAND-style subtle drop shadow -->
+<!-- Top bar: back + progress -->
 <header
-	class="relative z-10 hidden h-[52px] items-center justify-center bg-background shadow-[0_1px_1px_0_rgba(0,0,0,0.08)] sm:flex"
+	class="sticky top-0 z-10 flex h-14 items-center justify-between bg-background px-4 sm:h-[52px] sm:shadow-[0_1px_1px_0_rgba(0,0,0,0.08)] sm:px-6"
 >
-	<a
-		href="/auth/login"
-		class="text-[28px] font-black leading-none tracking-[-0.05em] text-foreground"
+	<button
+		type="button"
+		onclick={goBack}
+		aria-label="이전으로"
+		class="flex size-10 cursor-pointer items-center justify-center -ml-2 text-foreground transition-colors hover:text-primary"
 	>
-		moaorder
-	</a>
+		<IconChevronLeft size={26} stroke={2} />
+	</button>
+	<span class="text-xs font-medium text-muted-foreground">{stepIndex + 1} / {STEP_ORDER.length}</span>
 </header>
 
-<main class="bg-background px-10 pt-[38px] pb-8 sm:px-8">
-	<div class="mx-auto w-full space-y-[40px] sm:max-w-[440px]">
-		<!-- Title -->
-		<div class="text-center">
-			<h1 class="text-[25px] font-medium leading-tight text-foreground sm:text-[32px]">
-				회원가입
+<main class="bg-background px-6 pt-6 pb-8 sm:px-8">
+	<div class="mx-auto w-full sm:max-w-[440px]">
+		<div class="space-y-2">
+			<h1 class="text-[26px] font-bold leading-snug text-foreground sm:text-[28px]">
+				{stepTitles[step]}
 			</h1>
-			{#if step === 'consents'}
-				<p class="mt-[11px] text-sm text-muted-foreground">서비스 이용을 위한 안내를 확인하세요.</p>
-			{:else if email}
-				<p class="mt-0.5 text-[23px] font-light text-muted-foreground">{email}</p>
-			{/if}
+			<p class="text-sm text-muted-foreground">{stepSubtitles[step]}</p>
 		</div>
 
-		{#if step === 'fields'}
-			<form
-				onsubmit={(e) => { e.preventDefault(); handleNext(); }}
-				class="space-y-[34px]"
-			>
-				<div class="space-y-[40px]">
-					{#if emailError}
-						<p class="text-xs text-destructive text-center">{emailError}</p>
-					{/if}
-
-					<!-- Password -->
-					<div class="relative space-y-1.5">
+		<form
+			onsubmit={(e) => {
+				e.preventDefault();
+				goNext();
+			}}
+			class="mt-10 space-y-8"
+		>
+			{#if step === 'password'}
+				<div class="space-y-2">
+					<div class="relative">
 						<input
+							bind:this={passwordInput}
 							id="password"
 							type={showPassword ? 'text' : 'password'}
 							bind:value={password}
@@ -384,7 +382,7 @@
 							{@const StrengthIcon = strengthIcon[passwordStrength]}
 							<span
 								aria-live="polite"
-								class="pointer-events-none absolute top-1/2 right-10 flex -translate-y-1/2 items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold {strengthBadgeClass[passwordStrength]}"
+								class="pointer-events-none absolute top-[calc(50%-1px)] right-10 flex -translate-y-1/2 items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold {strengthBadgeClass[passwordStrength]}"
 							>
 								<StrengthIcon size={12} />
 								{strengthLabel[passwordStrength]}
@@ -395,7 +393,7 @@
 								type="button"
 								onclick={() => (showPassword = !showPassword)}
 								aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 표시'}
-								class="absolute top-1/2 right-0 flex size-9 -translate-y-1/2 cursor-pointer items-center justify-center text-muted-foreground/60 transition-colors hover:text-foreground"
+								class="absolute top-[calc(50%-1px)] right-0 flex size-9 -translate-y-1/2 cursor-pointer items-center justify-center text-muted-foreground/60 transition-colors hover:text-foreground"
 							>
 								{#if showPassword}
 									<IconEyeOff size={20} stroke={1.5} />
@@ -404,120 +402,157 @@
 								{/if}
 							</button>
 						{/if}
-						<p class="pointer-events-none absolute top-full left-0 mt-1.5 text-xs text-muted-foreground/60">
-							8~16자 영문 대소문자, 숫자, 특수문자를 사용하세요.
-						</p>
-						{#if passwordError}
-							<p class="text-xs text-destructive">{passwordError}</p>
-						{/if}
 					</div>
-
-					<!-- Name -->
-					<div class="space-y-1.5">
-						<input
-							id="name"
-							type="text"
-							bind:value={name}
-							onkeydown={(e) => {
-								if (e.key === 'Tab' && !e.shiftKey) birthdatePopoverOpen = true;
-							}}
-							placeholder="이름"
-							autocomplete="name"
-							aria-label="이름"
-							class={inputClass}
-							disabled={loading}
-						/>
-						{#if nameError}
-							<p class="text-xs text-destructive">{nameError}</p>
-						{/if}
-					</div>
-
-					<!-- Birthdate -->
-					<div class="space-y-1.5">
-						<Popover bind:open={birthdatePopoverOpen}>
-							<PopoverTrigger
-								aria-label="생년월일 선택"
-								disabled={loading}
-								class="{inputClass} cursor-pointer items-center text-left {displayBirthdate ? 'text-foreground' : 'text-muted-foreground/40'}"
-							>
-								{displayBirthdate || '생년월일'}
-							</PopoverTrigger>
-							<PopoverContent class="w-auto p-0" align="start">
-								<Calendar
-									type="single"
-									bind:value={birthdateValue}
-									locale="ko-KR"
-									captionLayout="dropdown"
-									maxValue={todayDate}
-									minValue={minDate}
-									onValueChange={() => (birthdatePopoverOpen = false)}
-								/>
-							</PopoverContent>
-						</Popover>
-						{#if birthdateError}
-							<p class="text-xs text-destructive">{birthdateError}</p>
-						{/if}
-					</div>
-
-					<!-- Region (required) -->
-					<div class="space-y-1.5">
-						<button
-							type="button"
-							disabled={loading}
-							onclick={() => (regionPickerOpen = true)}
-							aria-label="동네 선택"
-							class="{inputClass} cursor-pointer items-center text-left {region ? 'text-foreground' : 'text-muted-foreground/40'}"
-						>
-							{region || '동네'}
-						</button>
-						{#if regionError}
-							<p class="text-xs text-destructive">{regionError}</p>
-						{/if}
-					</div>
+					<p class="text-xs text-muted-foreground/60">
+						8~16자 영문 대소문자, 숫자, 특수문자를 사용하세요.
+					</p>
 				</div>
-
-				<button type="submit" disabled={loading || !isStep1Valid} class={submitClass}>
-					확인
-				</button>
-			</form>
-		{:else}
-			<form
-				onsubmit={(e) => { e.preventDefault(); handleSubmit(); }}
-				class="space-y-[24px]"
-			>
-				<div class="space-y-3">
-				<!-- Consents card (BAND style) -->
-				<div class="space-y-[11px] rounded-[16px] border border-border bg-card p-5">
+			{:else if step === 'name'}
+				<div class="space-y-1.5">
+					<input
+						bind:this={nameInput}
+						id="name"
+						type="text"
+						bind:value={name}
+						placeholder="이름"
+						autocomplete="name"
+						aria-label="이름"
+						class={inputClass}
+						disabled={loading}
+					/>
+				</div>
+			{:else if step === 'birthdate'}
+				<div class="space-y-1.5">
+					<Popover bind:open={birthdatePopoverOpen}>
+						<PopoverTrigger
+							aria-label="생년월일 선택"
+							disabled={loading}
+							class="{inputClass} cursor-pointer items-center text-left {displayBirthdate ? 'text-foreground' : 'text-muted-foreground/40'}"
+						>
+							{displayBirthdate || '생년월일'}
+						</PopoverTrigger>
+						<PopoverContent class="w-auto p-0" align="start">
+							<Calendar
+								type="single"
+								bind:value={birthdateValue}
+								locale="ko-KR"
+								captionLayout="dropdown"
+								maxValue={todayDate}
+								minValue={minDate}
+								onValueChange={() => (birthdatePopoverOpen = false)}
+							/>
+						</PopoverContent>
+					</Popover>
+					{#if birthdate.length === 8 && !isAge14Plus()}
+						<p class="text-xs text-destructive">만 14세 이상만 가입할 수 있어요</p>
+					{/if}
+				</div>
+			{:else if step === 'region'}
+				<div class="space-y-1.5">
 					<button
 						type="button"
-						onclick={toggleAll}
-						class="flex w-full cursor-pointer items-center gap-3 text-left"
+						disabled={loading}
+						onclick={() => (regionPickerOpen = true)}
+						aria-label="동네 선택"
+						class="{inputClass} cursor-pointer items-center text-left {region ? 'text-foreground' : 'text-muted-foreground/40'}"
 					>
-						{#if agreeAll}
-							<IconCircleCheckFilled size={24} class="text-primary" />
-						{:else}
-							<IconCircleCheck size={24} class="text-muted-foreground/20" />
-						{/if}
-						<span class="text-[15px] text-foreground">
-							<span class="font-bold">전체동의</span>
-							<span class="text-muted-foreground"> (선택 항목 포함)</span>
-						</span>
+						{region || '동네 선택'}
 					</button>
-
-					<div class="space-y-3">
-						<label class="flex cursor-pointer items-center gap-3">
-							<input type="checkbox" bind:checked={agreeTerms} class="sr-only" />
-							{#if agreeTerms}
+				</div>
+			{:else if step === 'consents'}
+				<div class="space-y-3">
+					<div class="space-y-[11px] rounded-[16px] border border-border bg-card p-5">
+						<button
+							type="button"
+							onclick={toggleAll}
+							class="flex w-full cursor-pointer items-center gap-3 text-left"
+						>
+							{#if agreeAll}
 								<IconCircleCheckFilled size={24} class="text-primary" />
 							{:else}
 								<IconCircleCheck size={24} class="text-muted-foreground/20" />
 							{/if}
 							<span class="text-[15px] text-foreground">
-								이용약관 동의 <span class="text-muted-foreground">(필수)</span>
+								<span class="font-bold">전체동의</span>
+								<span class="text-muted-foreground"> (선택 항목 포함)</span>
 							</span>
-						</label>
+						</button>
+
+						<div class="space-y-3">
+							<label class="flex cursor-pointer items-center gap-3">
+								<input type="checkbox" bind:checked={agreeTerms} class="sr-only" />
+								{#if agreeTerms}
+									<IconCircleCheckFilled size={24} class="text-primary" />
+								{:else}
+									<IconCircleCheck size={24} class="text-muted-foreground/20" />
+								{/if}
+								<span class="text-[15px] text-foreground">
+									이용약관 동의 <span class="text-muted-foreground">(필수)</span>
+								</span>
+							</label>
+							<div class="max-h-40 space-y-3 overflow-y-auto rounded-l-[12px] bg-muted/30 px-4 py-3 text-[12px] leading-relaxed text-muted-foreground">
+								{#each termsBlocks as block}
+									<div>
+										{#if block.body.length > 0}
+											<p class="font-semibold text-foreground">{block.header}</p>
+											{#each block.body as line}
+												{#if line.startsWith('- ')}
+													<p class="pl-3">{line}</p>
+												{:else}
+													<p>{line}</p>
+												{/if}
+											{/each}
+										{:else}
+											<p>{block.header}</p>
+										{/if}
+									</div>
+								{/each}
+								<div class="flex justify-end pt-2">
+									<button
+										type="button"
+										onclick={() => downloadFile(termsText, '모아오더_이용약관.txt')}
+										class="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+									>
+										다운로드
+									</button>
+								</div>
+							</div>
+						</div>
+
+						<div class="space-y-3">
+							<label class="flex cursor-pointer items-center gap-3">
+								<input type="checkbox" bind:checked={agreePrivacy} class="sr-only" />
+								{#if agreePrivacy}
+									<IconCircleCheckFilled size={24} class="text-primary" />
+								{:else}
+									<IconCircleCheck size={24} class="text-muted-foreground/20" />
+								{/if}
+								<span class="text-[15px] text-foreground">
+									개인정보 수집 및 이용 동의 <span class="text-muted-foreground">(선택)</span>
+								</span>
+							</label>
+							<label class="flex cursor-pointer items-center gap-3 pl-9">
+								<input type="checkbox" bind:checked={agreePrivacy} class="sr-only" />
+								<IconCheck
+									size={16}
+									stroke={2.5}
+									class={agreePrivacy ? 'text-primary' : 'text-muted-foreground/30'}
+								/>
+								<span class="text-[13px] text-muted-foreground">
+									이벤트, 광고성 정보 안내 (선택)
+								</span>
+							</label>
+						</div>
+
+						{#if consentError}
+							<p class="pt-1 text-xs text-destructive">{consentError}</p>
+						{/if}
+					</div>
+
+					<div class="space-y-3 rounded-[16px] border border-border bg-card p-5">
+						<p class="text-[15px] font-bold text-foreground">개인정보 수집 및 이용 안내</p>
 						<div class="max-h-40 space-y-3 overflow-y-auto rounded-l-[12px] bg-muted/30 px-4 py-3 text-[12px] leading-relaxed text-muted-foreground">
-							{#each termsBlocks as block}
+							{#each privacyBlocks as block}
 								<div>
 									{#if block.body.length > 0}
 										<p class="font-semibold text-foreground">{block.header}</p>
@@ -536,7 +571,7 @@
 							<div class="flex justify-end pt-2">
 								<button
 									type="button"
-									onclick={() => downloadFile(termsText, '모아오더_이용약관.txt')}
+									onclick={() => downloadFile(privacyText, '모아오더_개인정보_수집_및_이용_안내.txt')}
 									class="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
 								>
 									다운로드
@@ -544,82 +579,27 @@
 							</div>
 						</div>
 					</div>
-
-					<div class="space-y-3">
-						<label class="flex cursor-pointer items-center gap-3">
-							<input type="checkbox" bind:checked={agreePrivacy} class="sr-only" />
-							{#if agreePrivacy}
-								<IconCircleCheckFilled size={24} class="text-primary" />
-							{:else}
-								<IconCircleCheck size={24} class="text-muted-foreground/20" />
-							{/if}
-							<span class="text-[15px] text-foreground">
-								개인정보 수집 및 이용 동의 <span class="text-muted-foreground">(선택)</span>
-							</span>
-						</label>
-						<label class="flex cursor-pointer items-center gap-3 pl-9">
-							<input type="checkbox" bind:checked={agreePrivacy} class="sr-only" />
-							<IconCheck
-								size={16}
-								stroke={2.5}
-								class={agreePrivacy ? 'text-primary' : 'text-muted-foreground/30'}
-							/>
-							<span class="text-[13px] text-muted-foreground">
-								이벤트, 광고성 정보 안내 (선택)
-							</span>
-						</label>
-					</div>
-
-					{#if consentError}
-						<p class="pt-1 text-xs text-destructive">{consentError}</p>
-					{/if}
 				</div>
+			{/if}
 
-				<!-- Privacy collection notice card -->
-				<div class="space-y-3 rounded-[16px] border border-border bg-card p-5">
-					<p class="text-[15px] font-bold text-foreground">개인정보 수집 및 이용 안내</p>
-					<div class="max-h-40 space-y-3 overflow-y-auto rounded-l-[12px] bg-muted/30 px-4 py-3 text-[12px] leading-relaxed text-muted-foreground">
-						{#each privacyBlocks as block}
-							<div>
-								{#if block.body.length > 0}
-									<p class="font-semibold text-foreground">{block.header}</p>
-									{#each block.body as line}
-										{#if line.startsWith('- ')}
-											<p class="pl-3">{line}</p>
-										{:else}
-											<p>{line}</p>
-										{/if}
-									{/each}
-								{:else}
-									<p>{block.header}</p>
-								{/if}
-							</div>
-						{/each}
-						<div class="flex justify-end pt-2">
-							<button
-								type="button"
-								onclick={() => downloadFile(privacyText, '모아오더_개인정보_수집_및_이용_안내.txt')}
-								class="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
-							>
-								다운로드
-							</button>
-						</div>
-					</div>
-				</div>
-				</div>
-
-				<button type="submit" disabled={loading || !allRequired} aria-busy={loading} class={submitClass}>
-					<span class={loading ? 'invisible' : ''}>확인</span>
-					{#if loading}
-						<span class="absolute inset-0 flex items-center justify-center gap-1.5" aria-hidden="true">
-							<span class="size-2 animate-bounce rounded-full bg-current [animation-delay:-0.3s]"></span>
-							<span class="size-2 animate-bounce rounded-full bg-current [animation-delay:-0.15s]"></span>
-							<span class="size-2 animate-bounce rounded-full bg-current"></span>
-						</span>
-					{/if}
-				</button>
-			</form>
-		{/if}
+			<button
+				type="submit"
+				disabled={loading || !canAdvance()}
+				aria-busy={loading}
+				class={ctaClass}
+			>
+				<span class={loading ? 'invisible' : ''}>
+					{step === 'consents' ? '가입 완료' : '다음'}
+				</span>
+				{#if loading}
+					<span class="absolute inset-0 flex items-center justify-center gap-1.5" aria-hidden="true">
+						<span class="size-2 animate-bounce rounded-full bg-current [animation-delay:-0.3s]"></span>
+						<span class="size-2 animate-bounce rounded-full bg-current [animation-delay:-0.15s]"></span>
+						<span class="size-2 animate-bounce rounded-full bg-current"></span>
+					</span>
+				{/if}
+			</button>
+		</form>
 	</div>
 </main>
 
@@ -627,8 +607,12 @@
 {#if regionPickerOpen}
 	<div
 		class="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center"
-		onclick={(e) => { if (e.target === e.currentTarget) regionPickerOpen = false; }}
-		onkeydown={(e) => { if (e.key === 'Escape') regionPickerOpen = false; }}
+		onclick={(e) => {
+			if (e.target === e.currentTarget) regionPickerOpen = false;
+		}}
+		onkeydown={(e) => {
+			if (e.key === 'Escape') regionPickerOpen = false;
+		}}
 		role="dialog"
 		tabindex="-1"
 		aria-modal="true"
@@ -658,7 +642,11 @@
 					<li>
 						<button
 							type="button"
-							onclick={() => { region = r; regionPickerOpen = false; regionSearch = ''; }}
+							onclick={() => {
+								region = r;
+								regionPickerOpen = false;
+								regionSearch = '';
+							}}
 							class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm transition-colors hover:bg-muted {r === region ? 'bg-primary/10 text-primary font-medium' : 'text-foreground'}"
 						>
 							{r}
