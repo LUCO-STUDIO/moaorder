@@ -26,17 +26,21 @@
 		return page.url.pathname.startsWith(item.href);
 	}
 
-	onMount(async () => {
-		const currentUser = await fetchMe();
-		if (!currentUser) {
-			goto('/auth/login');
-			return;
-		}
-		if (currentUser.role !== 'owner') {
-			goto('/');
-			return;
-		}
-		return startNotificationPolling();
+	onMount(() => {
+		let stopPolling: (() => void) | undefined;
+		(async () => {
+			const currentUser = await fetchMe();
+			if (!currentUser) {
+				goto('/auth/login');
+				return;
+			}
+			if (!currentUser.is_owner) {
+				goto('/');
+				return;
+			}
+			stopPolling = startNotificationPolling();
+		})();
+		return () => stopPolling?.();
 	});
 </script>
 
@@ -53,9 +57,11 @@
 		<aside class="hidden md:flex md:flex-col md:w-60 md:fixed md:inset-y-0 bg-background border-r border-border z-40">
 			<!-- Logo -->
 			<div class="flex h-16 items-center px-6 border-b border-border shrink-0">
-				<a href="/owner" class="flex items-center gap-2.5">
-					<span class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-bold">모</span>
-					<span class="text-base font-bold text-foreground">모아오더</span>
+				<a
+					href="/owner"
+					class="text-[20px] font-black tracking-[-0.05em] text-foreground"
+				>
+					moaorder
 				</a>
 			</div>
 
@@ -115,9 +121,12 @@
 					<SheetContent side="left" class="w-72 p-0">
 						<!-- Sheet logo -->
 						<div class="flex h-16 items-center px-6 border-b border-border">
-							<a href="/owner" class="flex items-center gap-2.5" onclick={() => { mobileNavOpen = false; }}>
-								<span class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-bold">모</span>
-								<span class="text-base font-bold text-foreground">모아오더</span>
+							<a
+								href="/owner"
+								onclick={() => { mobileNavOpen = false; }}
+								class="text-[20px] font-black tracking-[-0.05em] text-foreground"
+							>
+								moaorder
 							</a>
 						</div>
 						<!-- Sheet store -->
@@ -158,9 +167,11 @@
 					</SheetContent>
 				</Sheet>
 
-				<a href="/owner" class="flex items-center gap-2">
-					<span class="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground text-xs font-bold">모</span>
-					<span class="text-base font-semibold text-foreground">모아오더</span>
+				<a
+					href="/owner"
+					class="text-[18px] font-black tracking-[-0.05em] text-foreground"
+				>
+					moaorder
 				</a>
 
 				{#if $unreadCount > 0}
