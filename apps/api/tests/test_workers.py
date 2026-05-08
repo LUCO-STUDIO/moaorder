@@ -170,6 +170,20 @@ async def test_auto_close_min_qty_not_met(db: AsyncSession) -> None:
 @pytest.mark.asyncio
 async def test_notification_send_inapp(db: AsyncSession) -> None:
     """pending inapp notification → status=sent, sent_at set."""
+    from sqlalchemy import update
+
+    # The worker batches LIMIT=100 pending notifications. HTTP-based tests
+    # commit notifications they create (the rollback in the db fixture only
+    # affects this session, not the application sessions used by handlers),
+    # so by the time we get here the pending queue can already be > 100. Park
+    # any pre-existing pending rows so this test's notif is in the batch.
+    await db.execute(
+        update(Notification)
+        .where(Notification.status == "pending")
+        .values(status="cancelled")
+    )
+    await db.commit()
+
     notif = Notification(
         user_id=None,
         type="order_confirmed",
