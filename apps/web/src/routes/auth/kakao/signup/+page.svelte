@@ -252,6 +252,9 @@
 						>
 							{region || '동네'}
 						</button>
+						{#if regionError}
+							<p class="text-xs text-destructive">{regionError}</p>
+						{/if}
 					</div>
 				</div>
 

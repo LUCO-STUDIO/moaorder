@@ -18,6 +18,8 @@ export interface PaymentResult {
 }
 
 export async function requestPayment(req: PaymentRequest): Promise<PaymentResult> {
+	// PortOne's request type is a discriminated union per payMethod; we currently
+	// only fire CARD payments, so we shape the call as that variant explicitly.
 	const response = await PortOne.requestPayment({
 		storeId: req.storeId,
 		channelKey: req.channelKey,
@@ -25,8 +27,8 @@ export async function requestPayment(req: PaymentRequest): Promise<PaymentResult
 		orderName: req.orderName,
 		totalAmount: req.totalAmount,
 		currency: (req.currency ?? 'KRW') as 'KRW',
-		payMethod: (req.payMethod ?? 'CARD') as 'CARD'
-	});
+		payMethod: 'CARD'
+	} as Parameters<typeof PortOne.requestPayment>[0]);
 
 	if (response?.code) {
 		return {
