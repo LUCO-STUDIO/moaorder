@@ -57,16 +57,16 @@
 	<title>로그인 중... - 모아오더</title>
 </svelte:head>
 
-<main class="flex min-h-screen items-center justify-center bg-gray-50">
+<main class="flex min-h-screen items-center justify-center bg-background">
 	{#if error}
-		<div class="text-center space-y-4">
-			<p class="text-red-500">{error}</p>
-			<a href="/auth/login" class="text-sm text-primary hover:underline">다시 로그인하기</a>
+		<div class="space-y-4 text-center">
+			<p class="text-[14px] font-semibold text-destructive">{error}</p>
+			<a href="/auth/login" class="text-[13px] font-semibold text-primary underline-offset-2 hover:underline">다시 로그인하기</a>
 		</div>
 	{:else}
-		<div class="text-center space-y-2">
+		<div class="space-y-3 text-center">
 			<div class="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-			<p class="text-sm text-gray-500">로그인 처리 중...</p>
+			<p class="text-[13px] text-muted-foreground">로그인 처리 중...</p>
 		</div>
 	{/if}
 </main>

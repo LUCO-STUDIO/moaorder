@@ -78,9 +78,9 @@
 	}
 
 	const statusBadgeClass: Record<string, string> = {
-		paid: 'bg-blue-100 text-blue-700',
-		confirmed: 'bg-amber-100 text-amber-700',
-		pickup_ready: 'bg-green-100 text-green-700'
+		paid: 'bg-primary/10 text-primary',
+		confirmed: 'bg-amber-50 text-amber-700',
+		pickup_ready: 'bg-emerald-50 text-emerald-700'
 	};
 
 	async function loadFeed() {

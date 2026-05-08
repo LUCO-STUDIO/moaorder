@@ -76,10 +76,10 @@
 
 {#if $authLoading}
 	<!-- Loading skeleton -->
-	<div class="min-h-screen bg-gray-50 flex items-center justify-center">
+	<div class="flex min-h-screen items-center justify-center bg-background">
 		<div class="flex flex-col items-center gap-3">
-			<div class="h-10 w-10 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
-			<p class="text-sm text-muted-foreground">잠시만요...</p>
+			<div class="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+			<p class="text-[13px] text-muted-foreground">잠시만요...</p>
 		</div>
 	</div>
 {:else if $user}
