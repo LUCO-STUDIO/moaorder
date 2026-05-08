@@ -4,6 +4,7 @@ import httpx
 
 from app.core.config import settings
 from app.models.order import Order
+from app.services.ops_alert import AlertLevel, notify
 
 PORTONE_API_BASE = "https://api.portone.io"
 
@@ -26,6 +27,16 @@ async def process_partial_refund(order: Order, refund_amount: int) -> str | None
         )
 
     if resp.status_code != 200:
+        await notify(
+            "PortOne 부분 환불 실패",
+            level=AlertLevel.CRITICAL,
+            context={
+                "order_id": str(order.id),
+                "payment_id": order.payment_id,
+                "amount": refund_amount,
+                "status": resp.status_code,
+            },
+        )
         raise ValueError(f"PortOne 부분환불 실패: {resp.status_code} {resp.text}")
 
     data = resp.json()
@@ -54,6 +65,15 @@ async def process_full_refund(order: Order, reason: str = "고객 요청 전체 
         )
 
     if resp.status_code != 200:
+        await notify(
+            "PortOne 전액 환불 실패",
+            level=AlertLevel.CRITICAL,
+            context={
+                "order_id": str(order.id),
+                "payment_id": order.payment_id,
+                "status": resp.status_code,
+            },
+        )
         raise ValueError(f"PortOne 전액환불 실패: {resp.status_code} {resp.text}")
 
     data = resp.json()

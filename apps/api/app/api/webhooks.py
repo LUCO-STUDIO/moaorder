@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.services.checkout import confirm_payment
+from app.services.ops_alert import AlertLevel, notify
 from app.services.payment import get_payment, verify_webhook_signature
 
 logger = logging.getLogger(__name__)
@@ -26,6 +27,14 @@ async def portone_webhook(
     #    Skipping when missing would let an attacker forge webhooks for any
     #    paymentId they happen to know.
     if not x_portone_signature or not verify_webhook_signature(payload, x_portone_signature):
+        await notify(
+            "PortOne 웹훅 서명 검증 실패",
+            level=AlertLevel.CRITICAL,
+            context={
+                "missing_header": not bool(x_portone_signature),
+                "client": request.client.host if request.client else "?",
+            },
+        )
         raise HTTPException(status_code=401, detail="웹훅 서명 검증 실패")
 
     # 2. Parse payload
@@ -76,5 +85,10 @@ async def portone_webhook(
         )
     except ValueError as e:
         logger.error("주문 생성 실패 (재시도 불가): payment_id=%s error=%s", payment_id, e)
+        await notify(
+            "주문 확정 실패 — 결제 데이터 불일치 (수동 정산 필요)",
+            level=AlertLevel.CRITICAL,
+            context={"payment_id": payment_id, "reason": str(e)},
+        )
 
     return {"ok": True}

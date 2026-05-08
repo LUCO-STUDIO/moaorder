@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     # Frontend
     FRONTEND_URL: str = "http://localhost:5173"
 
+    # Ops alerts (Discord webhook URL). Empty value disables alerting.
+    DISCORD_OPS_WEBHOOK_URL: str = ""
+
     # Testing
     TESTING: bool = False
 
