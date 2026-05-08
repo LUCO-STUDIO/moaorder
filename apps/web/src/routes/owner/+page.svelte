@@ -70,31 +70,33 @@
 	<title>대시보드 - 모아오더</title>
 </svelte:head>
 
-<div class="px-5 pt-6 pb-8 space-y-6 max-w-3xl">
+<div class="mx-auto max-w-3xl space-y-6 px-5 pt-6 pb-8">
 	<!-- Page header -->
-	<div class="space-y-1">
-		<h1 class="text-[24px] font-black tracking-[-0.03em] text-foreground sm:text-[28px]">대시보드</h1>
-		<p class="text-sm text-muted-foreground">{$user?.nickname ?? '사장'}님의 매장 현황</p>
+	<div class="space-y-1.5">
+		<h1 class="text-[26px] font-bold leading-tight tracking-[-0.03em] text-foreground sm:text-[32px]">
+			대시보드
+		</h1>
+		<p class="text-[14px] text-muted-foreground">{$user?.nickname ?? '사장'}님의 매장 현황</p>
 	</div>
 
 	{#if loading}
 		<!-- Skeleton stats -->
-		<div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+		<div class="grid grid-cols-2 gap-3 md:grid-cols-3">
 			{#each [0, 1, 2] as _}
-				<div class="rounded-xl bg-muted animate-pulse h-20"></div>
+				<div class="h-24 animate-pulse rounded-2xl bg-muted"></div>
 			{/each}
 		</div>
 		<div class="space-y-2.5">
 			{#each [0, 1] as _}
-				<div class="rounded-xl bg-muted animate-pulse h-16"></div>
+				<div class="h-16 animate-pulse rounded-2xl bg-muted"></div>
 			{/each}
 		</div>
 	{:else if error}
-		<div class="flex flex-col items-center gap-3 py-12 text-center">
+		<div class="flex flex-col items-center gap-4 rounded-2xl bg-muted/30 px-6 py-14 text-center">
 			<div class="text-4xl">⚠️</div>
-			<p class="text-sm text-muted-foreground">{error}</p>
+			<p class="text-[14px] text-muted-foreground">{error}</p>
 			<button
-				class="text-sm text-primary underline underline-offset-2"
+				class="text-[13px] font-semibold text-primary underline-offset-2 hover:underline"
 				onclick={fetchDashboard}
 			>
 				다시 시도
@@ -102,39 +104,39 @@
 		</div>
 	{:else if summary}
 		<!-- Stats grid -->
-		<div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-			<div class="rounded-xl bg-card ring-1 ring-border px-4 py-4 text-center">
-				<p class="text-3xl font-black text-primary">{summary.active_group_count}</p>
-				<p class="text-xs text-muted-foreground mt-1">진행 중 공구</p>
+		<div class="grid grid-cols-2 gap-3 md:grid-cols-3">
+			<div class="rounded-2xl bg-card px-5 py-5 text-center ring-1 ring-border">
+				<p class="text-[28px] font-bold tracking-[-0.03em] text-primary">{summary.active_group_count}</p>
+				<p class="mt-1 text-[12px] font-semibold text-muted-foreground">진행 중 공구</p>
 			</div>
-			<div class="rounded-xl bg-card ring-1 ring-border px-4 py-4 text-center">
-				<p class="text-3xl font-black text-foreground">{summary.total_order_count}</p>
-				<p class="text-xs text-muted-foreground mt-1">총 주문</p>
+			<div class="rounded-2xl bg-card px-5 py-5 text-center ring-1 ring-border">
+				<p class="text-[28px] font-bold tracking-[-0.03em] text-foreground">{summary.total_order_count}</p>
+				<p class="mt-1 text-[12px] font-semibold text-muted-foreground">총 주문</p>
 			</div>
-			<div class="col-span-2 md:col-span-1 rounded-xl bg-card ring-1 ring-border px-4 py-4 text-center">
-				<p class="text-2xl font-black text-green-600">
-					₩{summary.estimated_revenue.toLocaleString()}
+			<div class="col-span-2 rounded-2xl bg-card px-5 py-5 text-center ring-1 ring-border md:col-span-1">
+				<p class="text-[24px] font-bold tracking-[-0.03em] text-emerald-600">
+					{summary.estimated_revenue.toLocaleString()}원
 				</p>
-				<p class="text-xs text-muted-foreground mt-1">예상 매출</p>
+				<p class="mt-1 text-[12px] font-semibold text-muted-foreground">예상 매출</p>
 			</div>
 		</div>
 
 		<!-- Alert banners -->
 		{#if alerts && (alerts.picking_ready_groups.length > 0 || alerts.cancel_request_count > 0)}
 			<section class="space-y-2.5">
-				<h2 class="text-[17px] font-bold tracking-[-0.02em] text-foreground sm:text-[20px]">조치 필요</h2>
+				<h2 class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">조치 필요</h2>
 				{#if alerts.picking_ready_groups.length > 0}
 					<a
 						href="/owner/groups"
-						class="flex items-center justify-between rounded-xl bg-amber-50 border border-amber-200 px-4 py-3.5 hover:bg-amber-100 transition-colors active:scale-[0.99]"
+						class="flex items-center justify-between rounded-2xl bg-amber-50 px-5 py-4 ring-1 ring-amber-100 transition-colors hover:bg-amber-100/60 active:scale-[0.99]"
 					>
-						<div>
-							<p class="text-sm font-semibold text-amber-800">피킹 리스트 확인</p>
-							<p class="text-xs text-amber-600 mt-0.5">
+						<div class="space-y-1">
+							<p class="text-[14px] font-bold text-amber-800">피킹 리스트 확인</p>
+							<p class="text-[12px] text-amber-700/80">
 								{alerts.picking_ready_groups.length}개 공구 준비 필요
 							</p>
 						</div>
-						<svg class="size-4 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+						<svg class="size-4 shrink-0 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
 						</svg>
 					</a>
@@ -142,13 +144,13 @@
 				{#if alerts.cancel_request_count > 0}
 					<a
 						href="/owner/groups"
-						class="flex items-center justify-between rounded-xl bg-destructive/5 border border-destructive/20 px-4 py-3.5 hover:bg-destructive/10 transition-colors active:scale-[0.99]"
+						class="flex items-center justify-between rounded-2xl bg-destructive/5 px-5 py-4 ring-1 ring-destructive/20 transition-colors hover:bg-destructive/10 active:scale-[0.99]"
 					>
-						<div>
-							<p class="text-sm font-semibold text-destructive">취소 요청 {alerts.cancel_request_count}건</p>
-							<p class="text-xs text-destructive/70 mt-0.5">승인 또는 거절이 필요합니다</p>
+						<div class="space-y-1">
+							<p class="text-[14px] font-bold text-destructive">취소 요청 {alerts.cancel_request_count}건</p>
+							<p class="text-[12px] text-destructive/70">승인 또는 거절이 필요해요</p>
 						</div>
-						<svg class="size-4 text-destructive/60 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+						<svg class="size-4 shrink-0 text-destructive/60" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
 						</svg>
 					</a>
@@ -158,21 +160,21 @@
 
 		<!-- Active groups -->
 		<section class="space-y-3">
-			<div class="flex items-center justify-between">
-				<h2 class="text-[17px] font-bold tracking-[-0.02em] text-foreground sm:text-[20px]">진행 중 공구</h2>
-				<a href="/owner/groups" class="text-xs text-primary hover:underline underline-offset-2">전체 보기</a>
+			<div class="flex items-end justify-between">
+				<h2 class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">진행 중 공구</h2>
+				<a href="/owner/groups" class="text-[12px] font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">전체 보기</a>
 			</div>
 
 			{#if summary.groups.length === 0}
-				<div class="flex flex-col items-center gap-4 rounded-xl border border-dashed border-border bg-card py-12 text-center">
-					<div class="text-3xl">📦</div>
-					<div class="space-y-1">
-						<p class="text-sm font-semibold text-foreground">진행 중인 공구가 없습니다</p>
-						<p class="text-xs text-muted-foreground">새 공구를 만들어 수익을 시작해보세요</p>
+				<div class="flex flex-col items-center gap-4 rounded-2xl bg-muted/30 px-6 py-14 text-center">
+					<div class="text-4xl">📦</div>
+					<div class="space-y-1.5">
+						<p class="text-[15px] font-bold text-foreground">진행 중인 공구가 없어요</p>
+						<p class="text-[13px] text-muted-foreground">새 공구를 만들어 수익을 시작해보세요</p>
 					</div>
 					<a
 						href="/owner/groups/create"
-						class="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
+						class="rounded-xl bg-primary px-5 py-2.5 text-[13px] font-bold text-primary-foreground transition-colors hover:bg-primary/90"
 					>
 						새 공구 만들기
 					</a>
@@ -183,15 +185,15 @@
 						<li>
 							<a
 								href="/owner/groups/{group.id}"
-								class="block rounded-xl bg-card ring-1 ring-border px-4 py-4 hover:ring-primary/30 transition-all active:scale-[0.99] space-y-2"
+								class="block space-y-2 rounded-2xl bg-card px-5 py-4 ring-1 ring-border transition-all hover:ring-primary/30 active:scale-[0.99]"
 							>
-								<div class="flex items-start justify-between gap-2">
-									<p class="text-sm font-semibold text-foreground leading-snug">{group.product_name}</p>
-									<span class="shrink-0 text-xs font-medium text-primary/80 bg-primary/10 rounded-full px-2.5 py-0.5">
+								<div class="flex items-start justify-between gap-3">
+									<p class="text-[14px] font-bold leading-snug text-foreground">{group.product_name}</p>
+									<span class="shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-bold text-primary">
 										{timeUntil(group.closes_at)} 남음
 									</span>
 								</div>
-								<div class="flex gap-4 text-xs text-muted-foreground">
+								<div class="flex gap-4 text-[12px] text-muted-foreground">
 									<span>주문 <strong class="text-foreground">{group.order_count}건</strong></span>
 									{#if group.remaining_qty !== null}
 										<span>잔여 <strong class="text-foreground">{group.remaining_qty}개</strong></span>

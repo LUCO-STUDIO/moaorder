@@ -98,66 +98,68 @@
 	<title>피킹 리스트 - 모아오더</title>
 </svelte:head>
 
-<div class="px-5 pt-6 pb-28 max-w-2xl space-y-5">
+<div class="mx-auto max-w-2xl space-y-5 px-5 pt-6 pb-28">
 	{#if loading}
 		<div class="space-y-3">
-			<div class="h-8 w-48 bg-muted animate-pulse rounded-lg"></div>
-			<div class="h-16 bg-muted animate-pulse rounded-xl"></div>
+			<div class="h-8 w-48 animate-pulse rounded-lg bg-muted"></div>
+			<div class="h-16 animate-pulse rounded-2xl bg-muted"></div>
 			{#each [0, 1, 2, 3, 4] as _}
-				<div class="h-16 bg-muted animate-pulse rounded-xl"></div>
+				<div class="h-16 animate-pulse rounded-2xl bg-muted"></div>
 			{/each}
 		</div>
 	{:else if error && !data}
-		<div class="flex flex-col items-center gap-3 py-16 text-center">
+		<div class="flex flex-col items-center gap-4 rounded-2xl bg-muted/30 px-6 py-14 text-center">
 			<div class="text-4xl">⚠️</div>
-			<p class="text-sm text-foreground">{error}</p>
-			<button class="text-sm text-primary underline underline-offset-2" onclick={loadPickingList}>
+			<p class="text-[14px] font-bold text-foreground">{error}</p>
+			<button class="text-[13px] font-semibold text-primary underline-offset-2 hover:underline" onclick={loadPickingList}>
 				다시 시도
 			</button>
 		</div>
 	{:else if data}
 		<!-- Header -->
-		<div class="space-y-0.5">
-			<h1 class="text-xl font-bold text-foreground">{data.product_name}</h1>
-			<p class="text-sm text-muted-foreground">
-				총 수량: <span class="font-semibold text-primary">{data.total_quantity}개</span>
+		<div class="space-y-1.5">
+			<h1 class="text-[22px] font-bold leading-tight tracking-[-0.02em] text-foreground sm:text-[26px]">
+				{data.product_name}
+			</h1>
+			<p class="text-[13px] text-muted-foreground">
+				총 수량 <span class="ml-1 font-bold text-foreground">{data.total_quantity}개</span>
 			</p>
 		</div>
 
 		<!-- Progress bar -->
-		<div class="rounded-xl bg-card ring-1 ring-border px-4 py-4 space-y-2.5">
-			<div class="flex items-center justify-between text-sm">
-				<span class="text-muted-foreground font-medium">수령 완료</span>
-				<span class="font-bold text-foreground">{pickedCount} / {totalCount}</span>
+		<div class="space-y-3 rounded-2xl bg-card px-5 py-5 ring-1 ring-border">
+			<div class="flex items-center justify-between">
+				<span class="text-[14px] font-bold text-foreground">수령 완료</span>
+				<span class="text-[14px] font-bold {progress >= 100 ? 'text-emerald-600' : 'text-foreground'}">{pickedCount} / {totalCount}</span>
 			</div>
-			<div class="h-2.5 w-full rounded-full bg-muted overflow-hidden">
+			<div class="h-2.5 w-full overflow-hidden rounded-full bg-muted">
 				<div
-					class="h-full rounded-full transition-all duration-500 {progress >= 100 ? 'bg-green-500' : 'bg-primary'}"
+					class="h-full rounded-full transition-all duration-500 {progress >= 100 ? 'bg-emerald-500' : 'bg-primary'}"
 					style="width: {progress}%"
 				></div>
 			</div>
 			{#if progress >= 100}
-				<p class="text-xs text-green-600 font-medium">전원 수령 완료!</p>
+				<p class="text-[12px] font-semibold text-emerald-600">전원 수령 완료!</p>
 			{/if}
 		</div>
 
 		<!-- Search + filter -->
 		<div class="flex gap-2">
 			<div class="relative flex-1">
-				<svg class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+				<svg class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
 				</svg>
 				<input
 					type="text"
 					bind:value={searchQuery}
-					placeholder="주문자 검색..."
-					class="w-full rounded-xl border border-border bg-background pl-9 pr-3 py-2.5 text-sm placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors"
+					placeholder="주문자 검색"
+					class="h-11 w-full rounded-xl border border-input bg-background pl-9 pr-3 text-[14px] placeholder:text-muted-foreground transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
 				/>
 			</div>
 			<button
 				onclick={() => (showOnlyUnpicked = !showOnlyUnpicked)}
-				class="shrink-0 rounded-xl border px-3.5 py-2 text-sm font-medium transition-colors {showOnlyUnpicked
-					? 'bg-primary text-primary-foreground border-primary'
+				class="shrink-0 rounded-xl border px-4 text-[13px] font-bold transition-colors {showOnlyUnpicked
+					? 'border-foreground bg-foreground text-background'
 					: 'border-border text-muted-foreground hover:text-foreground'}"
 			>
 				미수령만
@@ -196,8 +198,9 @@
 		{/if}
 
 		{#if filteredItems.length === 0 && data.slot_groups.length === 0}
-			<div class="flex flex-col items-center gap-2 py-12 text-center">
-				<p class="text-sm text-muted-foreground">해당하는 주문이 없습니다</p>
+			<div class="flex flex-col items-center gap-4 rounded-2xl bg-muted/30 px-6 py-14 text-center">
+				<div class="text-4xl">📭</div>
+				<p class="text-[14px] font-bold text-foreground">해당하는 주문이 없어요</p>
 			</div>
 		{/if}
 	{/if}
@@ -213,16 +216,16 @@
 {/if}
 
 {#snippet PickingCard(item: PickingItem)}
-	<div class="flex items-center justify-between gap-3 rounded-xl bg-card ring-1 ring-border px-4 py-3.5 transition-all {item.is_picked_up ? 'opacity-50' : ''}">
-		<div class="flex-1 min-w-0">
+	<div class="flex items-center justify-between gap-3 rounded-2xl bg-card px-5 py-4 ring-1 ring-border transition-all {item.is_picked_up ? 'opacity-50' : ''}">
+		<div class="min-w-0 flex-1">
 			<div class="flex items-center gap-2">
-				<span class="text-sm font-semibold text-foreground truncate">{item.user_name}</span>
+				<span class="truncate text-[14px] font-bold text-foreground">{item.user_name}</span>
 				{#if item.is_picked_up}
-					<span class="shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-medium text-green-700">수령완료</span>
+					<span class="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 ring-1 ring-emerald-100">수령완료</span>
 				{/if}
 			</div>
-			<div class="text-xs text-muted-foreground mt-0.5">
-				수량 <span class="font-semibold text-foreground">{item.quantity}개</span>
+			<div class="mt-1 text-[12px] text-muted-foreground">
+				수량 <span class="font-bold text-foreground">{item.quantity}개</span>
 				{#if item.pickup_slot_label}
 					<span class="ml-2">· {item.pickup_slot_label}</span>
 				{/if}
@@ -232,7 +235,7 @@
 			<button
 				onclick={() => markPickedUp(item.order_id)}
 				disabled={actionLoading[item.order_id]}
-				class="shrink-0 rounded-lg border-2 border-primary/50 text-primary px-3.5 py-1.5 text-sm font-semibold hover:bg-primary/5 disabled:opacity-50 transition-colors"
+				class="shrink-0 rounded-xl bg-primary/5 px-4 py-2 text-[13px] font-bold text-primary ring-1 ring-primary/20 transition-colors hover:bg-primary/10 disabled:opacity-50"
 			>
 				{actionLoading[item.order_id] ? '...' : '수령'}
 			</button>
