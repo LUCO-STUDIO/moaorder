@@ -297,7 +297,8 @@ async def test_hold_expiry(db: AsyncSession) -> None:
         group_id=group.id,
         user_id=customer.id,
         quantity=3,
-        expires_at=_past(10),
+        # Past the 60s grace window — must be reaped this run.
+        expires_at=_past(120),
         status="active",
     )
     db.add(hold)
@@ -313,6 +314,63 @@ async def test_hold_expiry(db: AsyncSession) -> None:
 
     assert hold.status == "expired"
     assert group.remaining_qty == 8  # 5 + 3
+
+
+# ---------------------------------------------------------------------------
+# Hold expiry: grace window protects in-flight payments from being reaped
+# ---------------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_hold_expiry_respects_grace_window(db: AsyncSession) -> None:
+    """A hold whose TTL just passed but is still inside the grace window
+    must not be reaped — the PortOne webhook for that payment may still be
+    in flight, and reaping would oversell on confirm."""
+    owner = User(kakao_id=_make_kakao_id(), role="owner", nickname="사장님4")
+    db.add(owner)
+    await db.flush()
+
+    store = Store(owner_id=owner.id, name=f"매장_{uuid.uuid4().hex[:4]}")
+    db.add(store)
+    await db.flush()
+
+    customer = User(kakao_id=_make_kakao_id(), role="customer", nickname="고객4")
+    db.add(customer)
+    await db.flush()
+
+    group = Group(
+        public_id=uuid.uuid4().hex[:12],
+        store_id=store.id,
+        product_name="유예상품",
+        price=1000,
+        closes_at=_future(3600),
+        max_quantity=20,
+        remaining_qty=5,
+    )
+    db.add(group)
+    await db.flush()
+
+    hold = InventoryHold(
+        group_id=group.id,
+        user_id=customer.id,
+        quantity=2,
+        # Just expired (10s ago) — inside the grace window.
+        expires_at=_past(10),
+        status="active",
+    )
+    db.add(hold)
+    await db.flush()
+    await db.commit()
+
+    from app.workers.hold_cleaner import _run
+
+    await _run(db)
+
+    await db.refresh(hold)
+    await db.refresh(group)
+
+    # Untouched: still active, qty not restored.
+    assert hold.status == "active"
+    assert group.remaining_qty == 5
 
 
 # ---------------------------------------------------------------------------

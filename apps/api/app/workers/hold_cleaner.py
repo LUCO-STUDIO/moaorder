@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,6 +12,11 @@ from app.models.inventory import InventoryHold
 
 logger = logging.getLogger(__name__)
 
+# Grace window applied on top of expires_at before reclaiming a hold. Lets
+# in-flight PortOne webhooks land — without it, a payment that completed
+# milliseconds before TTL would race the cleaner and end up double-counted.
+EXPIRY_GRACE = timedelta(seconds=60)
+
 
 async def process_expired_holds() -> None:
     """Expire active holds whose expires_at <= now() and restore remaining_qty."""
@@ -21,10 +26,11 @@ async def process_expired_holds() -> None:
 
 async def _run(db: AsyncSession) -> None:
     now = datetime.now(timezone.utc)
+    cutoff = now - EXPIRY_GRACE
     result = await db.execute(
         select(InventoryHold).where(
             InventoryHold.status == "active",
-            InventoryHold.expires_at <= now,
+            InventoryHold.expires_at <= cutoff,
         )
     )
     holds = list(result.scalars().all())
