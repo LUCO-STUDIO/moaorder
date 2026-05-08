@@ -394,4 +394,16 @@ async def request_cancel(
 
     await db.commit()
 
+    from app.services.ops_alert import AlertLevel, notify
+
+    await notify(
+        f"❓ 취소 요청 — **{store.name}** / 주문 {order.current_quantity}개"
+        + (f" / 사유: {body.reason}" if body.reason else ""),
+        level=AlertLevel.WARNING,
+        context={
+            "order_id": str(order.id),
+            "store_id": str(order.store_id),
+        },
+    )
+
     return {"message": "취소 요청이 접수되었습니다"}

@@ -210,4 +210,17 @@ async def confirm_payment(
 
     await db.commit()
     await db.refresh(order)
+
+    from app.services.ops_alert import AlertLevel, notify
+
+    await notify(
+        f"🛒 새 주문 — **{group.product_name}** {hold.quantity}개 ({total:,}원)",
+        level=AlertLevel.INFO,
+        context={
+            "order_id": str(order.id),
+            "group_id": str(group.id),
+            "store_id": str(group.store_id),
+        },
+    )
+
     return order

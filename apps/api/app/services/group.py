@@ -336,6 +336,20 @@ async def close_group(group: Group, db: AsyncSession) -> Group:
 
             await db.commit()
             await db.refresh(group)
+
+            from app.services.ops_alert import AlertLevel, notify
+
+            await notify(
+                f"⚠️ 공구 취소 — **{group.product_name}** 최소수량 미달 "
+                f"(목표 {group.min_quantity}개 / 실제 {total_qty}개)",
+                level=AlertLevel.WARNING,
+                context={
+                    "group_id": str(group.id),
+                    "store_id": str(group.store_id),
+                    "refunded_orders": str(len(paid_orders)),
+                },
+            )
+
             return group
 
     # Normal close: PAID → CONFIRMED, notify customers
