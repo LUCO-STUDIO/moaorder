@@ -370,6 +370,74 @@ class TestWebhook:
         )
         assert resp.status_code == 401
 
+    @pytest.mark.asyncio
+    async def test_webhook_missing_signature_rejected(self, async_client: AsyncClient):
+        # Phase 2: webhook with no x-portone-signature header used to slip
+        # through (the if-header guard skipped verification entirely). Ensure
+        # the header is now mandatory so a forged paymentId can't drive order
+        # creation without proof of PortOne origin.
+        payload = json.dumps(
+            {"type": "Transaction.Paid", "data": {"paymentId": "anything"}}
+        ).encode()
+
+        resp = await async_client.post(
+            "/api/webhooks/portone",
+            content=payload,
+            headers={"Content-Type": "application/json"},
+        )
+        assert resp.status_code == 401
+
+    @pytest.mark.asyncio
+    async def test_webhook_amount_mismatch_returns_200(self, async_client: AsyncClient):
+        # Phase 2: confirm_payment ValueError (amount/status/hold mismatch) is
+        # non-retryable. Used to return 422 → PortOne would retry forever.
+        # Now we ack 200 + log error, no order created.
+        _, _, group_id = await _create_owner(async_client)
+        customer_token = await _create_customer(async_client)
+
+        prepare_resp = await async_client.post(
+            "/api/checkout/prepare",
+            json={"group_id": group_id, "quantity": 2},
+            cookies={"moaorder_token": customer_token},
+        )
+        payment_id = prepare_resp.json()["payment_id"]
+        expected_amount = prepare_resp.json()["amount"]
+
+        # Tamper: PortOne reports a different amount than what /prepare quoted.
+        mock_payment_info = {
+            "paymentId": payment_id,
+            "status": "PAID",
+            "amount": {"total": expected_amount + 1000},
+        }
+
+        payload = json.dumps(
+            {"type": "Transaction.Paid", "data": {"paymentId": payment_id}}
+        ).encode()
+        signature = _make_webhook_signature(payload)
+
+        with patch(
+            "app.api.webhooks.get_payment",
+            new_callable=AsyncMock,
+            return_value=mock_payment_info,
+        ):
+            resp = await async_client.post(
+                "/api/webhooks/portone",
+                content=payload,
+                headers={
+                    "Content-Type": "application/json",
+                    "x-portone-signature": signature,
+                },
+            )
+
+        assert resp.status_code == 200
+        # No order should have been created.
+        order_resp = await async_client.get(
+            f"/api/orders/by-payment/{payment_id}",
+            cookies={"moaorder_token": customer_token},
+        )
+        assert order_resp.status_code == 200
+        assert order_resp.json()["status"] != "paid"
+
 
 class TestOrderByPayment:
     @pytest.mark.asyncio

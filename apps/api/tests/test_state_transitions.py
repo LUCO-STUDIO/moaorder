@@ -586,3 +586,100 @@ class TestPickingList:
         assert "is_regular" in item
         assert item["total_order_count"] >= 1
         assert item["is_regular"] is False  # 첫 주문이므로 단골 아님
+
+
+# --- Tests: owner-initiated refund ---
+
+
+class TestOwnerRefund:
+    @pytest.mark.asyncio
+    async def test_owner_refund_cancels_order_and_records_adjustment(
+        self, async_client: AsyncClient
+    ):
+        owner_token, _, group_id = await _create_owner(async_client)
+        customer_token = await _create_customer(async_client)
+        order_id = await _place_order(async_client, group_id, customer_token)
+
+        # Close → confirmed
+        close_resp = await async_client.post(
+            f"/api/groups/{group_id}/close",
+            cookies={"moaorder_token": owner_token},
+        )
+        assert close_resp.status_code == 200
+
+        with patch(
+            "app.api.owner_orders.process_full_refund",
+            new_callable=AsyncMock,
+            return_value="refund_owner_init",
+        ):
+            resp = await async_client.post(
+                f"/api/orders/{order_id}/refund",
+                json={"reason": "재료 수급 문제로 매장 측 취소"},
+                cookies={"moaorder_token": owner_token},
+            )
+
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["refund_payment_id"] == "refund_owner_init"
+        assert body["refund_amount"] > 0
+
+        # Verify order status flipped to cancelled
+        detail = await async_client.get(
+            f"/api/orders/{order_id}",
+            cookies={"moaorder_token": customer_token},
+        )
+        assert detail.status_code == 200
+        assert detail.json()["status"] == "cancelled"
+
+    @pytest.mark.asyncio
+    async def test_owner_refund_rejects_non_owner(self, async_client: AsyncClient):
+        owner_token, _, group_id = await _create_owner(async_client)
+        customer_token = await _create_customer(async_client)
+        order_id = await _place_order(async_client, group_id, customer_token)
+
+        await async_client.post(
+            f"/api/groups/{group_id}/close",
+            cookies={"moaorder_token": owner_token},
+        )
+
+        # Customer tries to call the owner endpoint
+        resp = await async_client.post(
+            f"/api/orders/{order_id}/refund",
+            json={"reason": "환불해주세요"},
+            cookies={"moaorder_token": customer_token},
+        )
+        assert resp.status_code == 403
+
+    @pytest.mark.asyncio
+    async def test_owner_refund_rejects_paid_status(self, async_client: AsyncClient):
+        # Order is still 'paid' (group hasn't been closed). The endpoint should
+        # only allow refund from confirmed/pickup_ready states.
+        owner_token, _, group_id = await _create_owner(async_client)
+        customer_token = await _create_customer(async_client)
+        order_id = await _place_order(async_client, group_id, customer_token)
+
+        resp = await async_client.post(
+            f"/api/orders/{order_id}/refund",
+            json={"reason": "테스트"},
+            cookies={"moaorder_token": owner_token},
+        )
+        assert resp.status_code == 400
+
+    @pytest.mark.asyncio
+    async def test_owner_refund_requires_reason(self, async_client: AsyncClient):
+        owner_token, _, group_id = await _create_owner(async_client)
+        customer_token = await _create_customer(async_client)
+        order_id = await _place_order(async_client, group_id, customer_token)
+
+        await async_client.post(
+            f"/api/groups/{group_id}/close",
+            cookies={"moaorder_token": owner_token},
+        )
+
+        # Empty reason → pydantic validation 422
+        resp = await async_client.post(
+            f"/api/orders/{order_id}/refund",
+            json={"reason": ""},
+            cookies={"moaorder_token": owner_token},
+        )
+        assert resp.status_code == 422
