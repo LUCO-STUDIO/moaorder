@@ -69,22 +69,22 @@
 	{/if}
 
 	<!-- Content -->
-	<div class="px-5 pt-5 pb-32 space-y-5">
+	<div class="space-y-4 px-5 pt-6 pb-32">
 		<!-- Header -->
 		<div class="space-y-2">
 			<div class="flex items-center gap-2">
 				<Badge variant={currentStatus.variant}>{currentStatus.label}</Badge>
-				<span class="text-xs text-muted-foreground">{group.store_name}</span>
+				<span class="text-[12px] text-muted-foreground">{group.store_name}</span>
 			</div>
-			<h1 class="text-xl font-bold text-foreground leading-snug">{group.product_name}</h1>
-			<p class="text-2xl font-black text-primary">{formatPrice(group.price)}원</p>
+			<h1 class="text-[22px] font-bold leading-tight tracking-[-0.02em] text-foreground">{group.product_name}</h1>
+			<p class="text-[26px] font-bold tracking-[-0.03em] text-foreground">{formatPrice(group.price)}원</p>
 		</div>
 
 		<!-- Countdown -->
 		{#if group.status === 'open' && !isExpired}
-			<div class="rounded-xl bg-primary/5 border border-primary/20 px-4 py-4 text-center">
-				<p class="text-xs text-muted-foreground mb-1.5">마감까지</p>
-				<p class="text-2xl font-black text-primary tabular-nums tracking-tight">{formatCountdown(remainingMs)}</p>
+			<div class="rounded-2xl bg-primary/5 px-5 py-5 text-center ring-1 ring-primary/15">
+				<p class="mb-1.5 text-[12px] font-semibold text-muted-foreground">마감까지</p>
+				<p class="text-[28px] font-bold tabular-nums tracking-[-0.03em] text-primary">{formatCountdown(remainingMs)}</p>
 			</div>
 		{/if}
 
@@ -92,23 +92,23 @@
 		{#if group.type === 'group_buy' && group.min_quantity}
 			{@const currentOrders = group.max_quantity ? (group.max_quantity - (group.remaining_qty ?? 0)) : 0}
 			{@const pct = Math.min(100, (currentOrders / group.min_quantity) * 100)}
-			<div class="rounded-xl bg-card ring-1 ring-border px-4 py-4 space-y-2.5">
-				<div class="flex items-center justify-between text-sm">
-					<span class="text-muted-foreground font-medium">공동구매 현황</span>
-					<span class="font-semibold {currentOrders >= group.min_quantity ? 'text-green-600' : 'text-foreground'}">
+			<div class="space-y-3 rounded-2xl bg-card px-5 py-5 ring-1 ring-border">
+				<div class="flex items-center justify-between">
+					<span class="text-[14px] font-bold text-foreground">공동구매 현황</span>
+					<span class="text-[14px] font-bold {currentOrders >= group.min_quantity ? 'text-emerald-600' : 'text-foreground'}">
 						{currentOrders} / {group.min_quantity}개
 					</span>
 				</div>
-				<div class="relative h-2.5 rounded-full bg-muted overflow-hidden">
+				<div class="relative h-2.5 overflow-hidden rounded-full bg-muted">
 					<div
-						class="absolute inset-y-0 left-0 rounded-full transition-all duration-500 {pct >= 100 ? 'bg-green-500' : 'bg-primary'}"
+						class="absolute inset-y-0 left-0 rounded-full transition-all duration-500 {pct >= 100 ? 'bg-emerald-500' : 'bg-primary'}"
 						style="width: {pct}%"
 					></div>
 				</div>
 				{#if currentOrders >= group.min_quantity}
-					<p class="text-xs text-green-600 font-medium">최소 수량 달성! 공구가 확정됩니다</p>
+					<p class="text-[12px] font-semibold text-emerald-600">최소 수량 달성! 공구가 확정됩니다</p>
 				{:else}
-					<p class="text-xs text-muted-foreground">{group.min_quantity - currentOrders}개 더 모이면 공구 확정</p>
+					<p class="text-[12px] text-muted-foreground">{group.min_quantity - currentOrders}개 더 모이면 공구 확정</p>
 				{/if}
 			</div>
 		{/if}
@@ -117,11 +117,11 @@
 		{#if group.remaining_qty !== null && group.remaining_qty !== undefined}
 			<div class="flex items-center gap-2">
 				{#if group.remaining_qty > 0}
-					<span class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
+					<span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-700 ring-1 ring-amber-100">
 						잔여 {group.remaining_qty}개
 					</span>
 				{:else}
-					<span class="inline-flex items-center rounded-full bg-destructive/10 px-3 py-1 text-xs font-medium text-destructive">
+					<span class="inline-flex items-center rounded-full bg-destructive/10 px-2.5 py-1 text-[11px] font-bold text-destructive">
 						품절
 					</span>
 				{/if}
@@ -130,19 +130,19 @@
 
 		<!-- Description -->
 		{#if group.description}
-			<div class="rounded-xl bg-card ring-1 ring-border px-4 py-4">
-				<p class="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{group.description}</p>
+			<div class="rounded-2xl bg-card px-5 py-5 ring-1 ring-border">
+				<p class="whitespace-pre-wrap text-[14px] leading-relaxed text-foreground">{group.description}</p>
 			</div>
 		{/if}
 
 		<!-- Pickup slots -->
 		{#if group.pickup_slots && group.pickup_slots.length > 0}
 			<div class="space-y-2">
-				<p class="text-sm font-semibold text-foreground">픽업 시간대</p>
+				<p class="text-[14px] font-bold text-foreground">픽업 시간대</p>
 				{#each group.pickup_slots as slot}
-					<div class="rounded-xl bg-card ring-1 ring-border px-4 py-3">
-						<p class="text-sm font-medium text-foreground">{slot.label}</p>
-						<p class="text-xs text-muted-foreground mt-0.5">
+					<div class="rounded-2xl bg-card px-5 py-4 ring-1 ring-border">
+						<p class="text-[14px] font-semibold text-foreground">{slot.label}</p>
+						<p class="mt-1 text-[12px] text-muted-foreground">
 							{new Date(slot.start_at).toLocaleString('ko-KR')} ~ {new Date(slot.end_at).toLocaleString('ko-KR')}
 						</p>
 					</div>
@@ -152,43 +152,43 @@
 
 		<!-- Closed state info -->
 		{#if group.status !== 'open' || isExpired}
-			<div class="rounded-xl bg-card ring-1 ring-border px-4 py-4 space-y-3">
+			<div class="space-y-4 rounded-2xl bg-card px-5 py-5 ring-1 ring-border">
 				{#if group.status === 'cancelled'}
 					<div class="flex items-start gap-3">
-						<span class="text-2xl shrink-0">😢</span>
-						<div>
-							<p class="text-sm font-semibold text-foreground">최소 수량 미달로 취소된 공구예요</p>
-							<p class="text-xs text-muted-foreground mt-0.5">결제하셨다면 자동 환불됩니다</p>
+						<span class="shrink-0 text-2xl">😢</span>
+						<div class="space-y-1">
+							<p class="text-[14px] font-bold text-foreground">최소 수량 미달로 취소된 공구예요</p>
+							<p class="text-[12px] text-muted-foreground">결제하셨다면 자동 환불됩니다</p>
 						</div>
 					</div>
 				{:else if group.status === 'completed'}
 					<div class="flex items-start gap-3">
-						<span class="text-2xl shrink-0">✅</span>
-						<div>
-							<p class="text-sm font-semibold text-foreground">종료된 공구예요</p>
-							<p class="text-xs text-muted-foreground mt-0.5">이 공구는 성공적으로 완료되었습니다</p>
+						<span class="shrink-0 text-2xl">✅</span>
+						<div class="space-y-1">
+							<p class="text-[14px] font-bold text-foreground">종료된 공구예요</p>
+							<p class="text-[12px] text-muted-foreground">이 공구는 성공적으로 완료되었습니다</p>
 						</div>
 					</div>
 				{:else if group.status === 'pickup_ready'}
 					<div class="flex items-start gap-3">
-						<span class="text-2xl shrink-0">🎁</span>
-						<div>
-							<p class="text-sm font-semibold text-foreground">수령 가능 상태예요</p>
-							<p class="text-xs text-muted-foreground mt-0.5">매장에서 주문하신 상품을 수령해 주세요</p>
+						<span class="shrink-0 text-2xl">🎁</span>
+						<div class="space-y-1">
+							<p class="text-[14px] font-bold text-foreground">수령 가능 상태예요</p>
+							<p class="text-[12px] text-muted-foreground">매장에서 주문하신 상품을 수령해 주세요</p>
 						</div>
 					</div>
 				{:else}
 					<div class="flex items-start gap-3">
-						<span class="text-2xl shrink-0">🔒</span>
-						<div>
-							<p class="text-sm font-semibold text-foreground">마감된 공구예요</p>
-							<p class="text-xs text-muted-foreground mt-0.5">주문이 마감되었습니다</p>
+						<span class="shrink-0 text-2xl">🔒</span>
+						<div class="space-y-1">
+							<p class="text-[14px] font-bold text-foreground">마감된 공구예요</p>
+							<p class="text-[12px] text-muted-foreground">주문이 마감되었습니다</p>
 						</div>
 					</div>
 				{/if}
 				<a
 					href="/g?store={group.store_id}"
-					class="flex w-full items-center justify-center rounded-lg border border-primary/30 px-4 py-2.5 text-sm font-medium text-primary hover:bg-primary/5 transition-colors"
+					class="flex w-full items-center justify-center rounded-xl bg-primary/5 px-4 py-3 text-[13px] font-bold text-primary transition-colors hover:bg-primary/10"
 				>
 					이 매장의 진행 중 공구 보기
 				</a>
