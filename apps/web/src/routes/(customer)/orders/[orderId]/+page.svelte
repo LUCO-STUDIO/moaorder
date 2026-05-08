@@ -64,9 +64,9 @@
 	};
 
 	const statusBadge: Record<string, string> = {
-		paid: 'bg-blue-100 text-blue-700',
-		confirmed: 'bg-amber-100 text-amber-700',
-		pickup_ready: 'bg-green-100 text-green-700',
+		paid: 'bg-primary/10 text-primary',
+		confirmed: 'bg-amber-50 text-amber-700',
+		pickup_ready: 'bg-emerald-50 text-emerald-700',
 		cancelled: 'bg-muted text-muted-foreground'
 	};
 
@@ -158,63 +158,65 @@
 	<h1 class="ml-2 text-base font-semibold text-foreground">주문 상세</h1>
 </div>
 
-<div class="px-4 py-4 space-y-4">
+<div class="space-y-3 px-5 py-5">
 	{#if loading}
 		<!-- Skeleton -->
 		<div class="space-y-3">
-			<div class="rounded-xl bg-muted animate-pulse h-32"></div>
-			<div class="rounded-xl bg-muted animate-pulse h-24"></div>
-			<div class="rounded-xl bg-muted animate-pulse h-40"></div>
+			<div class="h-32 animate-pulse rounded-2xl bg-muted"></div>
+			<div class="h-24 animate-pulse rounded-2xl bg-muted"></div>
+			<div class="h-40 animate-pulse rounded-2xl bg-muted"></div>
 		</div>
 	{:else if error}
-		<div class="flex flex-col items-center gap-3 py-16 text-center">
+		<div class="flex flex-col items-center gap-4 rounded-2xl bg-muted/30 px-6 py-14 text-center">
 			<div class="text-4xl">⚠️</div>
-			<p class="text-sm font-medium text-foreground">{error}</p>
-			<button class="text-sm text-primary underline underline-offset-2" onclick={loadOrder}>
-				다시 시도
-			</button>
+			<div class="space-y-1.5">
+				<p class="text-[15px] font-bold text-foreground">{error}</p>
+				<button class="text-[13px] font-semibold text-primary underline-offset-2 hover:underline" onclick={loadOrder}>
+					다시 시도
+				</button>
+			</div>
 		</div>
 	{:else if order}
 		<!-- Pickup ready banner -->
 		{#if order.status === 'pickup_ready'}
-			<div class="rounded-xl bg-green-50 border border-green-200 px-4 py-3.5 flex items-center gap-3">
-				<span class="text-xl">🎁</span>
-				<p class="text-sm font-semibold text-green-700">수령 가능합니다. 매장에서 수령해주세요.</p>
+			<div class="flex items-center gap-3 rounded-2xl bg-emerald-50 px-5 py-4 ring-1 ring-emerald-100">
+				<span class="text-2xl">🎁</span>
+				<p class="text-[14px] font-bold text-emerald-800">수령 가능합니다. 매장에서 수령해주세요.</p>
 			</div>
 		{/if}
 
 		<!-- Order summary -->
-		<section class="rounded-xl bg-card ring-1 ring-border px-4 py-4 space-y-3">
-			<div class="flex items-start justify-between gap-2">
-				<div>
-					<p class="text-xs text-muted-foreground">{order.store_name}</p>
-					<p class="text-base font-bold text-foreground mt-0.5">{order.product_name}</p>
+		<section class="space-y-4 rounded-2xl bg-card px-5 py-5 ring-1 ring-border">
+			<div class="flex items-start justify-between gap-3">
+				<div class="min-w-0">
+					<p class="text-[12px] text-muted-foreground">{order.store_name}</p>
+					<p class="mt-1 text-[16px] font-bold text-foreground">{order.product_name}</p>
 				</div>
-				<span class="shrink-0 rounded-full px-3 py-1 text-xs font-semibold {statusBadge[order.status] ?? 'bg-muted text-muted-foreground'}">
+				<span class="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold {statusBadge[order.status] ?? 'bg-muted text-muted-foreground'}">
 					{order.status_label}
 				</span>
 			</div>
 
 			{#if order.status_sub}
-				<p class="text-xs text-muted-foreground">{order.status_sub}</p>
+				<p class="text-[12px] text-muted-foreground">{order.status_sub}</p>
 			{/if}
 
-			<div class="border-t border-border pt-3 space-y-2 text-sm">
-				<div class="flex justify-between">
+			<div class="space-y-2.5 border-t border-border pt-4">
+				<div class="flex justify-between text-[14px]">
 					<span class="text-muted-foreground">수량</span>
-					<span class="font-medium text-foreground">
+					<span class="text-foreground">
 						{order.current_quantity}개
 						{#if order.current_quantity !== order.quantity}
-							<span class="text-xs text-muted-foreground ml-1">(최초 {order.quantity}개)</span>
+							<span class="ml-1 text-[12px] text-muted-foreground">(최초 {order.quantity}개)</span>
 						{/if}
 					</span>
 				</div>
-				<div class="flex justify-between">
-					<span class="text-muted-foreground">결제 금액</span>
-					<span class="font-bold text-foreground">₩{order.current_amount.toLocaleString()}</span>
+				<div class="flex items-baseline justify-between">
+					<span class="text-[14px] font-bold text-foreground">결제 금액</span>
+					<span class="text-[20px] font-bold tracking-[-0.02em] text-foreground">{order.current_amount.toLocaleString()}원</span>
 				</div>
 				{#if order.paid_at}
-					<div class="flex justify-between">
+					<div class="flex justify-between text-[13px]">
 						<span class="text-muted-foreground">결제일</span>
 						<span class="text-foreground">{new Date(order.paid_at).toLocaleDateString('ko-KR')}</span>
 					</div>
@@ -224,10 +226,10 @@
 
 		<!-- Pickup slot -->
 		{#if order.pickup_slot}
-			<section class="rounded-xl bg-card ring-1 ring-border px-4 py-4">
-				<h2 class="text-sm font-semibold text-foreground mb-2">픽업 시간대</h2>
-				<p class="text-sm font-medium text-foreground">{order.pickup_slot.label}</p>
-				<p class="text-xs text-muted-foreground mt-0.5">
+			<section class="rounded-2xl bg-card px-5 py-5 ring-1 ring-border">
+				<h2 class="mb-2.5 text-[14px] font-bold text-foreground">픽업 시간대</h2>
+				<p class="text-[14px] font-semibold text-foreground">{order.pickup_slot.label}</p>
+				<p class="mt-1 text-[12px] text-muted-foreground">
 					{new Date(order.pickup_slot.start_at).toLocaleString('ko-KR', {
 						month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
 					})} ~
@@ -240,16 +242,16 @@
 
 		<!-- Timeline -->
 		{#if order.events.length > 0}
-			<section class="rounded-xl bg-card ring-1 ring-border px-4 py-4">
-				<h2 class="text-sm font-semibold text-foreground mb-4">주문 히스토리</h2>
-				<ol class="relative border-l-2 border-border ml-2 space-y-4">
+			<section class="rounded-2xl bg-card px-5 py-5 ring-1 ring-border">
+				<h2 class="mb-5 text-[14px] font-bold text-foreground">주문 히스토리</h2>
+				<ol class="relative ml-2 space-y-4 border-l-2 border-border">
 					{#each order.events as event, i}
-						<li class="pl-5 relative">
+						<li class="relative pl-5">
 							<span class="absolute -left-[9px] top-1 h-3.5 w-3.5 rounded-full border-2 border-background {i === 0 ? 'bg-primary' : 'bg-border'}"></span>
-							<p class="text-sm font-medium text-foreground">
+							<p class="text-[13px] font-semibold text-foreground">
 								{eventLabels[event.event_type] ?? event.event_type}
 							</p>
-							<time class="text-xs text-muted-foreground">
+							<time class="text-[12px] text-muted-foreground">
 								{new Date(event.created_at).toLocaleString('ko-KR', {
 									month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
 								})}
@@ -262,14 +264,14 @@
 
 		<!-- Quantity increase hint -->
 		{#if isPreDeadline(order)}
-			<p class="text-xs text-center text-muted-foreground">
+			<p class="text-center text-[12px] text-muted-foreground">
 				수량을 늘리려면 해당 공구에서 새로 주문해주세요
 			</p>
 		{/if}
 
 		<!-- Action buttons -->
 		{#if isPreDeadline(order)}
-			<div class="flex gap-3">
+			<div class="flex gap-3 pt-1">
 				<Button
 					variant="outline"
 					class="flex-1"
@@ -286,7 +288,7 @@
 				</Button>
 			</div>
 		{:else if canCancelRequest(order)}
-			<div class="space-y-2">
+			<div class="space-y-2 pt-1">
 				<Button
 					variant="outline"
 					class="w-full"
@@ -294,10 +296,10 @@
 				>
 					취소 요청하기
 				</Button>
-				<p class="text-xs text-center text-muted-foreground">취소 요청은 사장님 승인 후 처리됩니다</p>
+				<p class="text-center text-[12px] text-muted-foreground">취소 요청은 사장님 승인 후 처리됩니다</p>
 			</div>
 		{:else if order.cancel_requested_at}
-			<div class="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-700 text-center">
+			<div class="rounded-2xl bg-amber-50 px-5 py-4 text-center text-[13px] font-semibold text-amber-800 ring-1 ring-amber-100">
 				취소 요청이 접수되었습니다. 사장님 확인 중입니다.
 			</div>
 		{/if}
