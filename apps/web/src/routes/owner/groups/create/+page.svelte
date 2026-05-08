@@ -140,16 +140,16 @@
 	<title>새 공구 만들기 - 모아오더</title>
 </svelte:head>
 
-<div class="px-5 pt-6 pb-10 max-w-lg space-y-6">
+<div class="mx-auto max-w-2xl px-5 pt-6 pb-10 space-y-6 md:px-0 md:pt-10">
 	{#if createdGroup}
 		<!-- Success state -->
 		<div class="flex flex-col items-center text-center gap-6 py-10">
-			<div class="flex h-20 w-20 items-center justify-center rounded-2xl bg-green-100 text-4xl">
+			<div class="flex size-20 items-center justify-center rounded-3xl bg-emerald-100 text-4xl">
 				🎉
 			</div>
-			<div class="space-y-1">
-				<h1 class="text-xl font-bold text-foreground">공구가 게시되었습니다!</h1>
-				<p class="text-sm text-muted-foreground">{createdGroup.product_name}</p>
+			<div class="space-y-1.5">
+				<h1 class="text-[24px] font-bold tracking-[-0.02em] text-foreground sm:text-[28px]">공구를 게시했어요!</h1>
+				<p class="text-[14px] text-muted-foreground">{createdGroup.product_name}</p>
 			</div>
 
 			<div class="w-full rounded-xl bg-card ring-1 ring-border px-4 py-4 text-left space-y-3">
@@ -169,7 +169,12 @@
 			</div>
 		</div>
 	{:else}
-		<h1 class="text-2xl font-bold text-foreground">새 공구 만들기</h1>
+		<div class="space-y-2">
+			<h1 class="text-[26px] font-bold leading-tight tracking-[-0.03em] text-foreground sm:text-[32px]">
+				새 공구 만들기
+			</h1>
+			<p class="text-[14px] text-muted-foreground">상품과 마감 시간을 정하면 동네 피드에 노출돼요</p>
+		</div>
 
 		{#if error}
 			<div class="rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
