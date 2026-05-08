@@ -70,7 +70,7 @@ class SignupRequest(BaseModel):
     verified_email_token: str = Field(..., min_length=1)
     password: str = Field(..., min_length=8)
     nickname: str = Field(..., min_length=1, max_length=50)
-    region: Optional[str] = Field(default=None, max_length=100)
+    region: str = Field(..., min_length=1, max_length=100)
 
 
 class SendCodeRequest(BaseModel):
@@ -193,7 +193,7 @@ async def signup(
         password_hash=hash_password(body.password),
         nickname=body.nickname,
         role="customer",
-        region=body.region.strip() if body.region else None,
+        region=body.region.strip(),
         email_verified_at=datetime.now(timezone.utc),
     )
     db.add(user)

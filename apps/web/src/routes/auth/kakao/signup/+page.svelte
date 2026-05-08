@@ -64,6 +64,7 @@
 
 	let nameError = $state('');
 	let birthdateError = $state('');
+	let regionError = $state('');
 
 	let agreeTerms = $state(false);
 	let agreePrivacy = $state(false);
@@ -71,6 +72,7 @@
 
 	const allRequired = $derived(agreeTerms);
 	const agreeAll = $derived(allRequired && agreePrivacy);
+	const isRegionValid = $derived(region.length > 0);
 
 	function toggleAll() {
 		const next = !agreeAll;
@@ -104,6 +106,7 @@
 	function validateInputs(): boolean {
 		nameError = '';
 		birthdateError = '';
+		regionError = '';
 		let ok = true;
 		if (!name.trim()) {
 			nameError = '이름을 입력해주세요';
@@ -114,6 +117,10 @@
 			ok = false;
 		} else if (!isAge14Plus()) {
 			birthdateError = '만 14세 이상만 가입할 수 있어요';
+			ok = false;
+		}
+		if (!isRegionValid) {
+			regionError = '동네를 선택해주세요';
 			ok = false;
 		}
 		return ok;
@@ -140,7 +147,7 @@
 				birthdate,
 				agree_terms: agreeTerms,
 				agree_privacy: agreePrivacy,
-				region: region || null
+				region: region.trim()
 			});
 			const me = await api.get<AuthUser>('/auth/me');
 			setUser(me);
@@ -243,7 +250,7 @@
 							aria-label="동네 선택"
 							class="{inputClass} cursor-pointer items-center text-left {region ? 'text-foreground' : 'text-muted-foreground/40'}"
 						>
-							{region || '동네 (선택)'}
+							{region || '동네'}
 						</button>
 					</div>
 				</div>

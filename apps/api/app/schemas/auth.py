@@ -33,7 +33,7 @@ class KakaoCompleteSignupRequest(BaseModel):
     birthdate: str = Field(..., description="YYYYMMDD")
     agree_terms: bool
     agree_privacy: bool = False
-    region: Optional[str] = Field(default=None, max_length=100)
+    region: str = Field(..., min_length=1, max_length=100)
 
     @field_validator("birthdate")
     @classmethod

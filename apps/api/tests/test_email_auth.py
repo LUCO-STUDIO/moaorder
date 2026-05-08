@@ -29,6 +29,7 @@ async def _signup(
     password: str = "password123",
     nickname: str = "테스트",
     code: str = "123456",
+    region: str = "서울특별시 강남구",
 ):
     """Run the full inline-verification signup flow. Returns (signup_response, email)."""
     if email is None:
@@ -61,6 +62,7 @@ async def _signup(
                 "verified_email_token": verified_email_token,
                 "password": password,
                 "nickname": nickname,
+                "region": region,
             },
         )
     return signup_resp, email
@@ -240,6 +242,7 @@ class TestSignup:
                 "verified_email_token": "not.a.real.token",
                 "password": "password123",
                 "nickname": "테스트",
+                "region": "서울특별시 강남구",
             },
         )
         assert resp.status_code == 400

@@ -66,6 +66,7 @@
 	let passwordError = $state('');
 	let nameError = $state('');
 	let birthdateError = $state('');
+	let regionError = $state('');
 
 	// Consents
 	let agreeTerms = $state(false);
@@ -97,8 +98,9 @@
 	);
 	const isNameValid = $derived(name.trim().length > 0);
 	const isBirthdateValid = $derived(/^\d{8}$/.test(birthdate));
+	const isRegionValid = $derived(region.length > 0);
 	const isStep1Valid = $derived(
-		isEmailValid && isPasswordValid && isNameValid && isBirthdateValid
+		isEmailValid && isPasswordValid && isNameValid && isBirthdateValid && isRegionValid
 	);
 
 	type PasswordStrength = 'unusable' | 'weak' | 'medium' | 'safe';
@@ -205,6 +207,12 @@
 			birthdateError = '만 14세 이상만 가입할 수 있어요';
 			ok = false;
 		}
+		if (!region) {
+			regionError = '동네를 선택해주세요';
+			ok = false;
+		} else {
+			regionError = '';
+		}
 		return ok;
 	}
 
@@ -240,7 +248,7 @@
 				verified_email_token: verifiedEmailToken,
 				password,
 				nickname: name.trim(),
-				region: region || null
+				region: region.trim()
 			});
 			const me = await api.get<AuthUser>('/auth/me');
 			setUser(me);
@@ -399,7 +407,7 @@
 						{/if}
 					</div>
 
-					<!-- Region (optional) -->
+					<!-- Region (required) -->
 					<div class="space-y-1.5">
 						<button
 							type="button"
@@ -408,8 +416,11 @@
 							aria-label="동네 선택"
 							class="{inputClass} cursor-pointer items-center text-left {region ? 'text-foreground' : 'text-muted-foreground/40'}"
 						>
-							{region || '동네 (선택)'}
+							{region || '동네'}
 						</button>
+						{#if regionError}
+							<p class="text-xs text-destructive">{regionError}</p>
+						{/if}
 					</div>
 				</div>
 
