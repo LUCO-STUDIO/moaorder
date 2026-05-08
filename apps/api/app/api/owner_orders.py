@@ -14,7 +14,7 @@ from app.models.group import Group, GroupPickupSlot
 from app.models.order import Order, OrderAdjustment, OrderEvent
 from app.models.store import Store, StoreMember
 from app.models.user import User
-from app.schemas.order import OwnerOrderItem, OwnerOrderListResponse
+from app.schemas.order import OwnerOrderItem, OwnerOrderListResponse, OwnerRefundRequest
 from app.schemas.picking import PickingItem, PickingListResponse, PickingSlotGroup
 from app.services.notification import cancel_pending_notifications_for_order, create_notification
 from app.services.refund import process_full_refund
@@ -313,6 +313,81 @@ async def approve_cancel(
 
     await db.commit()
     return {"message": "취소 요청이 승인되었습니다"}
+
+
+@router.post("/orders/{order_id}/refund", status_code=200)
+async def owner_refund(
+    order_id: uuid.UUID,
+    body: OwnerRefundRequest,
+    current_user: Annotated[User, Depends(require_owner)],
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Owner-initiated full refund.
+
+    Used when the owner needs to refund without waiting for a customer
+    cancel-request — e.g. delivery damage, quality issue, owner cancels
+    the group. The customer is notified after the refund completes.
+    """
+    order = await _get_owner_order(order_id, current_user, db)
+
+    if order.status not in ("confirmed", "pickup_ready"):
+        raise HTTPException(status_code=400, detail="환불 가능한 상태가 아닙니다")
+
+    refund_amount = order.current_amount
+
+    try:
+        refund_id = await process_full_refund(order, reason=body.reason)
+    except ValueError as e:
+        raise HTTPException(status_code=502, detail=str(e)) from e
+
+    qty_before = order.current_quantity
+    order.status = "cancelled"
+    order.cancel_requested_at = None
+    await cancel_pending_notifications_for_order(db, order.id)
+
+    adj = OrderAdjustment(
+        order_id=order.id,
+        type="admin_cancel",
+        quantity_before=qty_before,
+        quantity_after=0,
+        refund_amount=refund_amount,
+        refund_status="completed",
+        refund_payment_id=refund_id,
+        reason=body.reason,
+        requested_by="owner",
+        approved_by=current_user.id,
+        approved_at=datetime.now(timezone.utc),
+    )
+    db.add(adj)
+
+    event = OrderEvent(
+        order_id=order.id,
+        event_type="owner_refund",
+        actor_id=current_user.id,
+        actor_type="owner",
+        extra={"refund_amount": refund_amount, "reason": body.reason},
+    )
+    db.add(event)
+
+    await create_notification(
+        db,
+        user_id=order.user_id,
+        notification_type="owner_refund",
+        title="주문이 환불되었습니다",
+        body=f"매장에서 주문을 환불 처리했어요. 사유: {body.reason}",
+        store_id=order.store_id,
+        group_id=order.group_id,
+        order_id=order.id,
+        payload={"group_id": str(order.group_id), "order_id": str(order.id)},
+        dedupe_key=f"owner_refund:{order.id}",
+    )
+
+    await db.commit()
+    return {
+        "message": "환불이 완료되었습니다",
+        "refund_amount": refund_amount,
+        "refund_payment_id": refund_id,
+    }
 
 
 @router.post("/orders/{order_id}/reject-cancel", status_code=200)

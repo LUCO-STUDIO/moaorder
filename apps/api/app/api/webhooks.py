@@ -22,8 +22,10 @@ async def portone_webhook(
 ) -> dict:
     payload = await request.body()
 
-    # 1. Signature verification
-    if x_portone_signature and not verify_webhook_signature(payload, x_portone_signature):
+    # 1. Signature verification — header MUST be present in every request.
+    #    Skipping when missing would let an attacker forge webhooks for any
+    #    paymentId they happen to know.
+    if not x_portone_signature or not verify_webhook_signature(payload, x_portone_signature):
         raise HTTPException(status_code=401, detail="웹훅 서명 검증 실패")
 
     # 2. Parse payload
@@ -61,7 +63,10 @@ async def portone_webhook(
         logger.info("portone webhook: 결제 상태 PAID 아님, status=%s", portone_status)
         return {"ok": True}
 
-    # 4. Confirm payment — idempotent via UNIQUE constraint on orders.payment_id
+    # 4. Confirm payment — idempotent via UNIQUE constraint on orders.payment_id.
+    #    confirm_payment ValueErrors (missing hold, amount mismatch, status mismatch)
+    #    are all non-retryable, so we ack with 200 and log; replying 4xx/5xx would
+    #    only cause PortOne to retry the same broken payload forever.
     try:
         await confirm_payment(
             payment_id=payment_id,
@@ -70,7 +75,6 @@ async def portone_webhook(
             db=db,
         )
     except ValueError as e:
-        logger.error("주문 생성 실패: payment_id=%s error=%s", payment_id, e)
-        raise HTTPException(status_code=422, detail=str(e)) from e
+        logger.error("주문 생성 실패 (재시도 불가): payment_id=%s error=%s", payment_id, e)
 
     return {"ok": True}
