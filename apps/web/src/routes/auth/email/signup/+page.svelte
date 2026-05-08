@@ -356,52 +356,54 @@
 			class="mt-10 space-y-8"
 		>
 			{#if step === 'password'}
-				<div class="relative space-y-1.5">
-					<input
-						bind:this={passwordInput}
-						id="password"
-						type={showPassword ? 'text' : 'password'}
-						bind:value={password}
-						oninput={(e) => {
-							const filtered = e.currentTarget.value.replace(/[^\x20-\x7E]/g, '');
-							if (filtered !== e.currentTarget.value) {
-								e.currentTarget.value = filtered;
-								password = filtered;
-							}
-						}}
-						placeholder="비밀번호"
-						autocomplete="new-password"
-						aria-label="비밀번호"
-						lang="en"
-						inputmode="text"
-						class="{inputClass} pr-32"
-						disabled={loading}
-					/>
-					{#if passwordStrength}
-						{@const StrengthIcon = strengthIcon[passwordStrength]}
-						<span
-							aria-live="polite"
-							class="pointer-events-none absolute top-1/2 right-10 flex -translate-y-1/2 items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold {strengthBadgeClass[passwordStrength]}"
-						>
-							<StrengthIcon size={12} />
-							{strengthLabel[passwordStrength]}
-						</span>
-					{/if}
-					{#if password.length > 0}
-						<button
-							type="button"
-							onclick={() => (showPassword = !showPassword)}
-							aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 표시'}
-							class="absolute top-1/2 right-0 flex size-9 -translate-y-1/2 cursor-pointer items-center justify-center text-muted-foreground/60 transition-colors hover:text-foreground"
-						>
-							{#if showPassword}
-								<IconEyeOff size={20} stroke={1.5} />
-							{:else}
-								<IconEye size={20} stroke={1.5} />
-							{/if}
-						</button>
-					{/if}
-					<p class="pt-2 text-xs text-muted-foreground/60">
+				<div class="space-y-2">
+					<div class="relative">
+						<input
+							bind:this={passwordInput}
+							id="password"
+							type={showPassword ? 'text' : 'password'}
+							bind:value={password}
+							oninput={(e) => {
+								const filtered = e.currentTarget.value.replace(/[^\x20-\x7E]/g, '');
+								if (filtered !== e.currentTarget.value) {
+									e.currentTarget.value = filtered;
+									password = filtered;
+								}
+							}}
+							placeholder="비밀번호"
+							autocomplete="new-password"
+							aria-label="비밀번호"
+							lang="en"
+							inputmode="text"
+							class="{inputClass} pr-32"
+							disabled={loading}
+						/>
+						{#if passwordStrength}
+							{@const StrengthIcon = strengthIcon[passwordStrength]}
+							<span
+								aria-live="polite"
+								class="pointer-events-none absolute top-1/2 right-10 flex -translate-y-1/2 items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold {strengthBadgeClass[passwordStrength]}"
+							>
+								<StrengthIcon size={12} />
+								{strengthLabel[passwordStrength]}
+							</span>
+						{/if}
+						{#if password.length > 0}
+							<button
+								type="button"
+								onclick={() => (showPassword = !showPassword)}
+								aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 표시'}
+								class="absolute top-1/2 right-0 flex size-9 -translate-y-1/2 cursor-pointer items-center justify-center text-muted-foreground/60 transition-colors hover:text-foreground"
+							>
+								{#if showPassword}
+									<IconEyeOff size={20} stroke={1.5} />
+								{:else}
+									<IconEye size={20} stroke={1.5} />
+								{/if}
+							</button>
+						{/if}
+					</div>
+					<p class="text-xs text-muted-foreground/60">
 						8~16자 영문 대소문자, 숫자, 특수문자를 사용하세요.
 					</p>
 				</div>
