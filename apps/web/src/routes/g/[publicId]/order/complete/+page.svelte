@@ -63,26 +63,28 @@
 	<title>주문 완료 - 모아오더</title>
 </svelte:head>
 
-<main class="flex min-h-screen flex-col items-center justify-center bg-background px-5">
+<main class="flex min-h-screen flex-col items-center justify-center bg-background px-5 py-10">
 	<div class="w-full max-w-sm">
 		{#if status === 'polling'}
-			<div class="rounded-xl bg-card ring-1 ring-border px-6 py-12 text-center space-y-4">
+			<div class="space-y-5 rounded-3xl bg-card px-6 py-14 text-center ring-1 ring-border">
 				<div class="flex justify-center">
-					<div class="h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+					<div class="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
 				</div>
-				<p class="text-base font-semibold text-foreground">주문 확인 중...</p>
-				<p class="text-sm text-muted-foreground">잠시만 기다려주세요</p>
+				<div class="space-y-1.5">
+					<p class="text-[18px] font-bold tracking-[-0.02em] text-foreground">주문 확인 중</p>
+					<p class="text-[13px] text-muted-foreground">잠시만 기다려주세요</p>
+				</div>
 			</div>
 
 		{:else if status === 'paid'}
-			<div class="rounded-xl bg-card ring-1 ring-border px-6 py-12 text-center space-y-6">
-				<div class="flex h-20 w-20 mx-auto items-center justify-center rounded-full bg-green-100 text-4xl">
+			<div class="space-y-7 rounded-3xl bg-card px-6 py-14 text-center ring-1 ring-border">
+				<div class="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-emerald-100 text-5xl">
 					🎉
 				</div>
-				<div class="space-y-1.5">
-					<p class="text-xl font-bold text-foreground">주문이 완료되었습니다!</p>
-					<p class="text-sm text-muted-foreground">
-						자동으로 매장을 구독했습니다.<br />공구 소식을 알림으로 받아보세요.
+				<div class="space-y-2">
+					<p class="text-[22px] font-bold tracking-[-0.03em] text-foreground">주문이 완료됐어요</p>
+					<p class="text-[14px] leading-relaxed text-muted-foreground">
+						자동으로 매장을 구독했어요.<br />공구 소식을 알림으로 받아보세요.
 					</p>
 				</div>
 				<div class="space-y-2.5">
@@ -92,23 +94,23 @@
 			</div>
 
 		{:else if status === 'timeout'}
-			<div class="rounded-xl bg-card ring-1 ring-border px-6 py-12 text-center space-y-6">
+			<div class="space-y-7 rounded-3xl bg-card px-6 py-14 text-center ring-1 ring-border">
 				<div class="text-5xl">⏱️</div>
-				<div class="space-y-1.5">
-					<p class="text-lg font-bold text-foreground">주문 확인이 지연되고 있어요</p>
-					<p class="text-sm text-muted-foreground">
-						결제는 정상 처리되었을 수 있습니다.<br />주문 내역에서 확인해주세요.
+				<div class="space-y-2">
+					<p class="text-[20px] font-bold tracking-[-0.02em] text-foreground">주문 확인이 지연되고 있어요</p>
+					<p class="text-[14px] leading-relaxed text-muted-foreground">
+						결제는 정상 처리되었을 수 있어요.<br />주문 내역에서 확인해주세요.
 					</p>
 				</div>
 				<Button class="w-full" size="lg" href="/orders">주문 내역 확인하기</Button>
 			</div>
 
 		{:else}
-			<div class="rounded-xl bg-card ring-1 ring-border px-6 py-12 text-center space-y-6">
+			<div class="space-y-7 rounded-3xl bg-card px-6 py-14 text-center ring-1 ring-border">
 				<div class="text-5xl">⚠️</div>
-				<div class="space-y-1.5">
-					<p class="text-lg font-bold text-foreground">오류가 발생했습니다</p>
-					<p class="text-sm text-muted-foreground">{errorMsg}</p>
+				<div class="space-y-2">
+					<p class="text-[20px] font-bold tracking-[-0.02em] text-foreground">오류가 발생했어요</p>
+					<p class="text-[14px] text-muted-foreground">{errorMsg}</p>
 				</div>
 				<Button class="w-full" href="/g/{publicId}">공구 페이지로 돌아가기</Button>
 			</div>
