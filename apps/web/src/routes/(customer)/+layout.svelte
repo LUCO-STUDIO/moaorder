@@ -32,16 +32,20 @@
 		return page.url.pathname.startsWith(href);
 	}
 
-	onMount(async () => {
-		const currentUser = await fetchMe();
-		if (!currentUser) {
-			goto('/auth/login');
-			return;
-		}
-		// Owner-and-customer dual mode: do not redirect store owners away.
-		// They land on the unified home; owner-only sections appear when
-		// currentUser.is_owner is true.
-		return startNotificationPolling();
+	onMount(() => {
+		let stopPolling: (() => void) | undefined;
+		(async () => {
+			const currentUser = await fetchMe();
+			if (!currentUser) {
+				goto('/auth/login');
+				return;
+			}
+			// Owner-and-customer dual mode: do not redirect store owners away.
+			// They land on the unified home; owner-only sections appear when
+			// currentUser.is_owner is true.
+			stopPolling = startNotificationPolling();
+		})();
+		return () => stopPolling?.();
 	});
 </script>
 

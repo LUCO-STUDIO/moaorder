@@ -72,8 +72,8 @@
 
 <div class="px-5 pt-6 pb-8 space-y-6 max-w-3xl">
 	<!-- Page header -->
-	<div class="space-y-0.5">
-		<h1 class="text-2xl font-bold text-foreground">대시보드</h1>
+	<div class="space-y-1">
+		<h1 class="text-[24px] font-black tracking-[-0.03em] text-foreground sm:text-[28px]">대시보드</h1>
 		<p class="text-sm text-muted-foreground">{$user?.nickname ?? '사장'}님의 매장 현황</p>
 	</div>
 
@@ -122,7 +122,7 @@
 		<!-- Alert banners -->
 		{#if alerts && (alerts.picking_ready_groups.length > 0 || alerts.cancel_request_count > 0)}
 			<section class="space-y-2.5">
-				<h2 class="text-sm font-semibold text-foreground">조치 필요</h2>
+				<h2 class="text-[17px] font-bold tracking-[-0.02em] text-foreground sm:text-[20px]">조치 필요</h2>
 				{#if alerts.picking_ready_groups.length > 0}
 					<a
 						href="/owner/groups"
@@ -159,7 +159,7 @@
 		<!-- Active groups -->
 		<section class="space-y-3">
 			<div class="flex items-center justify-between">
-				<h2 class="text-sm font-semibold text-foreground">진행 중 공구</h2>
+				<h2 class="text-[17px] font-bold tracking-[-0.02em] text-foreground sm:text-[20px]">진행 중 공구</h2>
 				<a href="/owner/groups" class="text-xs text-primary hover:underline underline-offset-2">전체 보기</a>
 			</div>
 
