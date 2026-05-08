@@ -382,7 +382,7 @@
 							{@const StrengthIcon = strengthIcon[passwordStrength]}
 							<span
 								aria-live="polite"
-								class="pointer-events-none absolute top-1/2 right-10 flex -translate-y-1/2 items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold {strengthBadgeClass[passwordStrength]}"
+								class="pointer-events-none absolute top-[calc(50%-1px)] right-10 flex -translate-y-1/2 items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold {strengthBadgeClass[passwordStrength]}"
 							>
 								<StrengthIcon size={12} />
 								{strengthLabel[passwordStrength]}
@@ -393,7 +393,7 @@
 								type="button"
 								onclick={() => (showPassword = !showPassword)}
 								aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 표시'}
-								class="absolute top-1/2 right-0 flex size-9 -translate-y-1/2 cursor-pointer items-center justify-center text-muted-foreground/60 transition-colors hover:text-foreground"
+								class="absolute top-[calc(50%-1px)] right-0 flex size-9 -translate-y-1/2 cursor-pointer items-center justify-center text-muted-foreground/60 transition-colors hover:text-foreground"
 							>
 								{#if showPassword}
 									<IconEyeOff size={20} stroke={1.5} />
