@@ -45,59 +45,59 @@
 		</div>
 
 		{#if submitted}
-			<div class="space-y-4 text-center">
-				<div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
-					<svg class="size-8 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+			<div class="space-y-5 text-center">
+				<div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
+					<svg class="size-9 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 						<rect width="20" height="16" x="2" y="4" rx="2"/>
 						<path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
 					</svg>
 				</div>
-				<div>
-					<h2 class="text-xl font-bold">이메일을 확인해주세요</h2>
-					<p class="mt-1 text-sm text-muted-foreground">
-						해당 이메일로 가입된 계정이 있다면 비밀번호 재설정 링크를 보내드렸습니다.
+				<div class="space-y-2">
+					<h2 class="text-[22px] font-bold tracking-[-0.03em] text-foreground">이메일을 확인해주세요</h2>
+					<p class="text-[14px] leading-relaxed text-muted-foreground">
+						해당 이메일로 가입된 계정이 있다면<br />비밀번호 재설정 링크를 보내드렸어요.
 					</p>
 				</div>
 				<a
 					href="/auth/email/login"
-					class="flex h-12 w-full items-center justify-center rounded-xl border border-border bg-background px-5 text-sm font-semibold hover:bg-muted"
+					class="flex h-12 w-full items-center justify-center rounded-xl border border-border bg-background px-5 text-[14px] font-bold text-foreground transition-colors hover:bg-muted"
 				>
 					로그인으로 돌아가기
 				</a>
 			</div>
 		{:else}
-			<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }} class="space-y-4">
-				<p class="text-sm text-muted-foreground">
-					가입한 이메일 주소를 입력하시면 비밀번호 재설정 링크를 보내드립니다.
+			<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }} class="space-y-5">
+				<p class="text-[14px] leading-relaxed text-muted-foreground">
+					가입한 이메일 주소를 입력하시면<br />비밀번호 재설정 링크를 보내드릴게요.
 				</p>
 
-				<div class="space-y-1.5">
-					<label for="email" class="text-sm font-medium">이메일</label>
+				<div class="space-y-2">
+					<label for="email" class="text-[13px] font-bold text-foreground">이메일</label>
 					<input
 						id="email"
 						type="email"
 						bind:value={email}
 						placeholder="name@example.com"
 						autocomplete="email"
-						class="flex h-11 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50"
+						class="flex h-12 w-full rounded-xl border border-input bg-background px-4 text-[14px] placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
 						disabled={loading}
 					/>
 					{#if emailError}
-						<p class="text-xs text-destructive">{emailError}</p>
+						<p class="text-[12px] font-semibold text-destructive">{emailError}</p>
 					{/if}
 				</div>
 
 				<button
 					type="submit"
 					disabled={loading}
-					class="flex h-12 w-full items-center justify-center rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground hover:brightness-95 active:scale-[0.99] disabled:opacity-50"
+					class="flex h-12 w-full items-center justify-center rounded-xl bg-primary px-5 text-[14px] font-bold text-primary-foreground transition-all hover:brightness-95 active:scale-[0.99] disabled:opacity-50"
 				>
 					{loading ? '전송 중...' : '재설정 링크 보내기'}
 				</button>
 
 				<a
 					href="/auth/email/login"
-					class="flex w-full items-center justify-center text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground"
+					class="flex w-full items-center justify-center text-[13px] font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
 				>
 					로그인으로 돌아가기
 				</a>

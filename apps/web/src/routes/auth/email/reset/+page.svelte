@@ -70,61 +70,61 @@
 		</div>
 
 		{#if success}
-			<div class="space-y-4 text-center">
-				<div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-					<svg class="size-8 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+			<div class="space-y-5 text-center">
+				<div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100">
+					<svg class="size-9 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
 					</svg>
 				</div>
-				<div>
-					<h2 class="text-xl font-bold">비밀번호가 변경되었습니다</h2>
-					<p class="mt-1 text-sm text-muted-foreground">새 비밀번호로 로그인해주세요.</p>
+				<div class="space-y-2">
+					<h2 class="text-[22px] font-bold tracking-[-0.03em] text-foreground">비밀번호가 변경됐어요</h2>
+					<p class="text-[14px] leading-relaxed text-muted-foreground">새 비밀번호로 로그인해주세요.</p>
 				</div>
 				<button
 					onclick={() => goto('/auth/email/login')}
-					class="flex h-12 w-full items-center justify-center rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground hover:brightness-95 active:scale-[0.99]"
+					class="flex h-12 w-full items-center justify-center rounded-xl bg-primary px-5 text-[14px] font-bold text-primary-foreground transition-all hover:brightness-95 active:scale-[0.99]"
 				>
 					로그인하기
 				</button>
 			</div>
 		{:else}
-			<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }} class="space-y-4">
-				<div class="space-y-1.5">
-					<label for="new-password" class="text-sm font-medium">새 비밀번호</label>
+			<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }} class="space-y-5">
+				<div class="space-y-2">
+					<label for="new-password" class="text-[13px] font-bold text-foreground">새 비밀번호</label>
 					<input
 						id="new-password"
 						type="password"
 						bind:value={newPassword}
 						placeholder="영문+숫자 8자 이상"
 						autocomplete="new-password"
-						class="flex h-11 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50"
+						class="flex h-12 w-full rounded-xl border border-input bg-background px-4 text-[14px] placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
 						disabled={loading}
 					/>
 					{#if passwordError}
-						<p class="text-xs text-destructive">{passwordError}</p>
+						<p class="text-[12px] font-semibold text-destructive">{passwordError}</p>
 					{/if}
 				</div>
 
-				<div class="space-y-1.5">
-					<label for="confirm-password" class="text-sm font-medium">비밀번호 확인</label>
+				<div class="space-y-2">
+					<label for="confirm-password" class="text-[13px] font-bold text-foreground">비밀번호 확인</label>
 					<input
 						id="confirm-password"
 						type="password"
 						bind:value={confirmPassword}
 						placeholder="비밀번호를 다시 입력해주세요"
 						autocomplete="new-password"
-						class="flex h-11 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50"
+						class="flex h-12 w-full rounded-xl border border-input bg-background px-4 text-[14px] placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
 						disabled={loading}
 					/>
 					{#if confirmPasswordError}
-						<p class="text-xs text-destructive">{confirmPasswordError}</p>
+						<p class="text-[12px] font-semibold text-destructive">{confirmPasswordError}</p>
 					{/if}
 				</div>
 
 				<button
 					type="submit"
 					disabled={loading || !token}
-					class="flex h-12 w-full items-center justify-center rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground hover:brightness-95 active:scale-[0.99] disabled:opacity-50"
+					class="flex h-12 w-full items-center justify-center rounded-xl bg-primary px-5 text-[14px] font-bold text-primary-foreground transition-all hover:brightness-95 active:scale-[0.99] disabled:opacity-50"
 				>
 					{loading ? '변경 중...' : '비밀번호 변경'}
 				</button>
