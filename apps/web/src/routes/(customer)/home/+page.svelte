@@ -197,7 +197,7 @@
 									<p class="text-sm font-semibold text-foreground truncate">{item.product_name}</p>
 									<p class="text-xs text-muted-foreground mt-0.5">{item.store_name} · {item.quantity}개</p>
 								</div>
-								<span class="ml-3 shrink-0 rounded-full px-2.5 py-1 text-xs font-medium {item.group_status === 'pickup_ready' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}">
+								<span class="ml-3 shrink-0 rounded-full px-2.5 py-1 text-xs font-medium {item.group_status === 'pickup_ready' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">
 									{item.pickup_label}
 								</span>
 							</a>
