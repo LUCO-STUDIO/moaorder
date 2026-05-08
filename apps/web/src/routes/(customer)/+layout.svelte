@@ -82,7 +82,7 @@
 			<p class="text-sm text-muted-foreground">잠시만요...</p>
 		</div>
 	</div>
-{:else if $user && $user.role === 'customer'}
+{:else if $user}
 	<div class="min-h-screen bg-background">
 		<!-- Email verification banner -->
 		{#if $user && $user.email && !$user.email_verified && !verificationBannerDismissed}
