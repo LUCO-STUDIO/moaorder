@@ -102,6 +102,7 @@ async def _signup_via_kakao(
             "birthdate": _adult_birthdate(),
             "agree_terms": True,
             "agree_privacy": True,
+            "region": "서울특별시 강남구",
         },
     )
     assert complete.status_code == 200
@@ -185,6 +186,7 @@ class TestKakaoCompleteSignup:
                 "birthdate": _adult_birthdate(),
                 "agree_terms": False,
                 "agree_privacy": True,
+                "region": "서울특별시 강남구",
             },
         )
         assert resp.status_code == 400
@@ -213,6 +215,7 @@ class TestKakaoCompleteSignup:
                 "birthdate": too_young,
                 "agree_terms": True,
                 "agree_privacy": False,
+                "region": "서울특별시 강남구",
             },
         )
         assert resp.status_code == 400
@@ -227,6 +230,7 @@ class TestKakaoCompleteSignup:
                 "birthdate": _adult_birthdate(),
                 "agree_terms": True,
                 "agree_privacy": False,
+                "region": "서울특별시 강남구",
             },
         )
         assert resp.status_code == 400

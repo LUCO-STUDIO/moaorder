@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, beforeNavigate } from '$app/navigation';
 	import { page } from '$app/state';
-	import { tick } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { api } from '$lib/api';
 	import { setUser } from '$lib/stores/auth';
 	import type { AuthUser } from '$lib/stores/auth';
@@ -66,6 +66,7 @@
 	let passwordError = $state('');
 	let nameError = $state('');
 	let birthdateError = $state('');
+	let regionError = $state('');
 
 	// Consents
 	let agreeTerms = $state(false);
@@ -97,8 +98,9 @@
 	);
 	const isNameValid = $derived(name.trim().length > 0);
 	const isBirthdateValid = $derived(/^\d{8}$/.test(birthdate));
+	const isRegionValid = $derived(region.length > 0);
 	const isStep1Valid = $derived(
-		isEmailValid && isPasswordValid && isNameValid && isBirthdateValid
+		isEmailValid && isPasswordValid && isNameValid && isBirthdateValid && isRegionValid
 	);
 
 	type PasswordStrength = 'unusable' | 'weak' | 'medium' | 'safe';
@@ -146,6 +148,57 @@
 	} as const;
 
 	let emailInput: HTMLInputElement | null = $state(null);
+
+	// Leave-confirm: warn the user before any navigation away from the signup
+	// page if they have started filling the form. The verify-email step
+	// regenerates a code on mount, so a back-button press silently invalidates
+	// their progress.
+	let submittedSuccessfully = $state(false);
+	let leaveConfirmOpen = $state(false);
+	let pendingLeaveAction: (() => void) | null = $state(null);
+
+	const isDirty = $derived(
+		!submittedSuccessfully &&
+			(password.length > 0 ||
+				name.trim().length > 0 ||
+				birthdate.length > 0 ||
+				region.length > 0 ||
+				agreeTerms ||
+				agreePrivacy)
+	);
+
+	beforeNavigate((nav) => {
+		if (!isDirty) return;
+		if (nav.to?.url.pathname === page.url.pathname) return;
+		nav.cancel();
+		pendingLeaveAction = () => {
+			submittedSuccessfully = true; // bypass the dirty check on retry
+			if (nav.to) goto(nav.to.url.toString());
+		};
+		leaveConfirmOpen = true;
+	});
+
+	onMount(() => {
+		const handler = (e: BeforeUnloadEvent) => {
+			if (!isDirty) return;
+			e.preventDefault();
+			e.returnValue = '';
+		};
+		window.addEventListener('beforeunload', handler);
+		return () => window.removeEventListener('beforeunload', handler);
+	});
+
+	function confirmLeave() {
+		const action = pendingLeaveAction;
+		pendingLeaveAction = null;
+		leaveConfirmOpen = false;
+		action?.();
+	}
+
+	function cancelLeave() {
+		pendingLeaveAction = null;
+		leaveConfirmOpen = false;
+	}
 
 	function toggleAll() {
 		const next = !agreeAll;
@@ -205,6 +258,12 @@
 			birthdateError = '만 14세 이상만 가입할 수 있어요';
 			ok = false;
 		}
+		if (!region) {
+			regionError = '동네를 선택해주세요';
+			ok = false;
+		} else {
+			regionError = '';
+		}
 		return ok;
 	}
 
@@ -240,10 +299,11 @@
 				verified_email_token: verifiedEmailToken,
 				password,
 				nickname: name.trim(),
-				region: region || null
+				region: region.trim()
 			});
 			const me = await api.get<AuthUser>('/auth/me');
 			setUser(me);
+			submittedSuccessfully = true;
 			toast.success('회원가입이 완료됐어요!');
 			goto('/');
 		} catch (err: unknown) {
@@ -399,7 +459,7 @@
 						{/if}
 					</div>
 
-					<!-- Region (optional) -->
+					<!-- Region (required) -->
 					<div class="space-y-1.5">
 						<button
 							type="button"
@@ -408,8 +468,11 @@
 							aria-label="동네 선택"
 							class="{inputClass} cursor-pointer items-center text-left {region ? 'text-foreground' : 'text-muted-foreground/40'}"
 						>
-							{region || '동네 (선택)'}
+							{region || '동네'}
 						</button>
+						{#if regionError}
+							<p class="text-xs text-destructive">{regionError}</p>
+						{/if}
 					</div>
 				</div>
 
@@ -606,6 +669,45 @@
 					</li>
 				{/each}
 			</ul>
+		</div>
+	</div>
+{/if}
+
+<!-- Leave-confirm dialog -->
+{#if leaveConfirmOpen}
+	<div
+		class="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 sm:items-center"
+		onclick={(e) => {
+			if (e.target === e.currentTarget) cancelLeave();
+		}}
+		onkeydown={(e) => {
+			if (e.key === 'Escape') cancelLeave();
+		}}
+		role="dialog"
+		tabindex="-1"
+		aria-modal="true"
+	>
+		<div class="w-full max-w-sm rounded-t-2xl bg-background p-5 sm:rounded-2xl">
+			<h3 class="mb-2 text-base font-bold text-foreground">정말 나가시겠어요?</h3>
+			<p class="mb-5 text-sm leading-relaxed text-muted-foreground">
+				지금 나가시면 입력하신 정보가 사라지고, 인증번호도 다시 받아야 해요.
+			</p>
+			<div class="flex gap-2">
+				<button
+					type="button"
+					onclick={cancelLeave}
+					class="flex-1 cursor-pointer rounded-xl border border-border bg-background px-4 py-3 text-sm font-medium text-foreground hover:bg-muted"
+				>
+					계속 작성
+				</button>
+				<button
+					type="button"
+					onclick={confirmLeave}
+					class="flex-1 cursor-pointer rounded-xl bg-destructive px-4 py-3 text-sm font-bold text-destructive-foreground hover:brightness-95"
+				>
+					나가기
+				</button>
+			</div>
 		</div>
 	</div>
 {/if}
