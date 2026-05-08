@@ -77,17 +77,17 @@
 		<h1 class="ml-2 text-base font-semibold text-foreground">주문하기</h1>
 	</div>
 
-	<div class="px-5 py-5 space-y-4">
+	<div class="space-y-3 px-5 py-5">
 		<!-- Product info -->
-		<div class="rounded-xl bg-card ring-1 ring-border px-4 py-4">
-			<p class="text-xs text-muted-foreground">{group.store_name}</p>
-			<p class="text-base font-bold text-foreground mt-0.5">{group.product_name}</p>
-			<p class="text-lg font-black text-primary mt-1">{formatPrice(group.price)}원</p>
+		<div class="rounded-2xl bg-card px-5 py-5 ring-1 ring-border">
+			<p class="text-[12px] text-muted-foreground">{group.store_name}</p>
+			<p class="mt-1 text-[16px] font-bold text-foreground">{group.product_name}</p>
+			<p class="mt-1.5 text-[20px] font-bold tracking-[-0.02em] text-foreground">{formatPrice(group.price)}원</p>
 		</div>
 
 		<!-- Quantity selector -->
-		<div class="rounded-xl bg-card ring-1 ring-border px-4 py-4 space-y-3">
-			<p class="text-sm font-semibold text-foreground">수량 선택</p>
+		<div class="space-y-4 rounded-2xl bg-card px-5 py-5 ring-1 ring-border">
+			<p class="text-[14px] font-bold text-foreground">수량 선택</p>
 			<div class="flex items-center gap-4">
 				<button
 					class="flex h-10 w-10 items-center justify-center rounded-full border-2 border-border text-lg font-bold text-foreground hover:border-primary hover:text-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
@@ -112,8 +112,8 @@
 
 		<!-- Pickup slot selector -->
 		{#if group.type === 'pickup' && group.pickup_slots?.length > 0}
-			<div class="rounded-xl bg-card ring-1 ring-border px-4 py-4 space-y-3">
-				<p class="text-sm font-semibold text-foreground">픽업 시간대 선택</p>
+			<div class="space-y-4 rounded-2xl bg-card px-5 py-5 ring-1 ring-border">
+				<p class="text-[14px] font-bold text-foreground">픽업 시간대 선택</p>
 				<div class="space-y-2">
 					{#each group.pickup_slots as slot}
 						<label class="flex items-center gap-3 cursor-pointer rounded-lg border border-border px-3 py-2.5 hover:border-primary/50 transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
@@ -142,18 +142,18 @@
 		{/if}
 
 		<!-- Amount summary -->
-		<div class="rounded-xl bg-card ring-1 ring-border px-4 py-4 space-y-2">
-			<div class="flex justify-between text-sm">
+		<div class="space-y-2.5 rounded-2xl bg-card px-5 py-5 ring-1 ring-border">
+			<div class="flex justify-between text-[14px]">
 				<span class="text-muted-foreground">단가</span>
 				<span class="text-foreground">{formatPrice(group.price)}원</span>
 			</div>
-			<div class="flex justify-between text-sm">
+			<div class="flex justify-between text-[14px]">
 				<span class="text-muted-foreground">수량</span>
 				<span class="text-foreground">{quantity}개</span>
 			</div>
-			<div class="border-t border-border pt-2.5 mt-2 flex justify-between">
-				<span class="text-sm font-semibold text-foreground">결제 금액</span>
-				<span class="text-lg font-black text-primary">{formatPrice(totalAmount)}원</span>
+			<div class="mt-1 flex items-baseline justify-between border-t border-border pt-3">
+				<span class="text-[14px] font-bold text-foreground">결제 금액</span>
+				<span class="text-[22px] font-bold tracking-[-0.02em] text-foreground">{formatPrice(totalAmount)}원</span>
 			</div>
 		</div>
 
