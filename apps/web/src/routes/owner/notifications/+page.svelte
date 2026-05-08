@@ -109,14 +109,16 @@
 	<title>알림 - 모아오더</title>
 </svelte:head>
 
-<main class="px-4 py-6">
-	<div class="mb-4 flex items-center justify-between">
-		<h1 class="text-xl font-bold text-gray-900">알림</h1>
+<main class="mx-auto max-w-3xl px-5 pt-6 pb-8">
+	<div class="mb-5 flex items-end justify-between">
+		<h1 class="text-[26px] font-bold leading-tight tracking-[-0.03em] text-foreground sm:text-[32px]">
+			알림
+		</h1>
 		{#if notifications.some((n) => !n.read_at)}
 			<button
 				onclick={markAllRead}
 				disabled={markingAll}
-				class="text-sm text-primary disabled:opacity-50"
+				class="text-[13px] font-semibold text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
 			>
 				전체 읽음
 			</button>
@@ -126,34 +128,39 @@
 	{#if loading}
 		<div class="space-y-3">
 			{#each Array(4) as _}
-				<div class="h-16 animate-pulse rounded-xl bg-gray-100"></div>
+				<div class="h-20 animate-pulse rounded-2xl bg-muted"></div>
 			{/each}
 		</div>
 	{:else if notifications.length === 0}
-		<div class="rounded-xl border border-gray-200 bg-white p-8 text-center text-sm text-gray-400">
-			새로운 알림이 없습니다
+		<div class="flex flex-col items-center gap-4 rounded-2xl bg-muted/30 px-6 py-14 text-center">
+			<div class="text-4xl">🔔</div>
+			<div class="space-y-1.5">
+				<p class="text-[15px] font-bold text-foreground">새로운 알림이 없어요</p>
+				<p class="text-[13px] text-muted-foreground">중요한 소식이 도착하면 여기에 보여드릴게요</p>
+			</div>
 		</div>
 	{:else}
-		<ul class="space-y-2">
+		<ul class="space-y-2.5">
 			{#each notifications as notif (notif.id)}
 				<li>
 					<button
 						onclick={() => markRead(notif)}
-						class="flex w-full items-start gap-3 rounded-xl border p-4 text-left transition-colors
-							{notif.read_at
-							? 'border-gray-100 bg-white text-gray-500'
-							: 'border-orange-100 bg-orange-50 text-gray-900'}"
+						class="flex w-full items-start gap-3 rounded-2xl px-5 py-4 text-left transition-colors {notif.read_at
+							? 'bg-card ring-1 ring-border'
+							: 'bg-primary/5 ring-1 ring-primary/20'}"
 					>
 						<span class="mt-0.5 shrink-0 text-2xl">{typeIcon(notif.type)}</span>
 						<div class="min-w-0 flex-1">
-							<p class="truncate text-sm font-semibold">{notif.title}</p>
+							<p class="truncate text-[14px] font-semibold {notif.read_at ? 'text-muted-foreground' : 'text-foreground'}">
+								{notif.title}
+							</p>
 							{#if notif.body}
-								<p class="mt-0.5 text-xs leading-relaxed text-gray-500">{notif.body}</p>
+								<p class="mt-0.5 text-[13px] leading-relaxed text-muted-foreground">{notif.body}</p>
 							{/if}
-							<p class="mt-1 text-xs text-gray-400">{relativeTime(notif.created_at)}</p>
+							<p class="mt-1.5 text-[12px] text-muted-foreground/70">{relativeTime(notif.created_at)}</p>
 						</div>
 						{#if !notif.read_at}
-							<span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-orange-500"></span>
+							<span class="mt-1.5 size-2 shrink-0 rounded-full bg-primary"></span>
 						{/if}
 					</button>
 				</li>

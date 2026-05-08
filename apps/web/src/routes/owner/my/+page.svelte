@@ -64,41 +64,43 @@
 	<title>마이페이지 - 모아오더</title>
 </svelte:head>
 
-<div class="px-5 pt-6 pb-10 max-w-lg space-y-5">
-	<h1 class="text-2xl font-bold text-foreground">마이페이지</h1>
+<div class="mx-auto max-w-lg space-y-5 px-5 pt-6 pb-10">
+	<h1 class="text-[26px] font-bold leading-tight tracking-[-0.03em] text-foreground sm:text-[32px]">
+		마이페이지
+	</h1>
 
 	<!-- Profile card -->
-	<div class="rounded-xl bg-card ring-1 ring-border px-4 py-4 flex items-center gap-4">
+	<div class="flex items-center gap-4 rounded-2xl bg-card px-5 py-5 ring-1 ring-border">
 		<div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary/10 text-2xl">
 			🏪
 		</div>
-		<div>
-			<p class="text-base font-bold text-foreground">{$user?.nickname ?? '사장님'}</p>
-			<p class="text-sm text-muted-foreground">{$user?.region ?? '지역 미설정'}</p>
+		<div class="min-w-0 space-y-1">
+			<p class="truncate text-[16px] font-bold text-foreground">{$user?.nickname ?? '사장님'}</p>
+			<p class="truncate text-[13px] text-muted-foreground">{$user?.region ?? '지역 미설정'}</p>
 		</div>
 	</div>
 
 	<!-- Store info -->
 	{#if store && editing}
-		<div class="rounded-xl bg-card ring-1 ring-border px-4 py-4">
+		<div class="rounded-2xl bg-card px-5 py-5 ring-1 ring-border">
 			<form class="space-y-4" onsubmit={(e) => { e.preventDefault(); saveEdit(); }}>
-				<div class="space-y-1.5">
-					<Label>매장명</Label>
+				<div class="space-y-2">
+					<Label class="text-[13px] font-bold text-foreground">매장명</Label>
 					<Input bind:value={storeName} />
 				</div>
-				<div class="space-y-1.5">
-					<Label>지역</Label>
+				<div class="space-y-2">
+					<Label class="text-[13px] font-bold text-foreground">지역</Label>
 					<Input bind:value={storeRegion} />
 				</div>
-				<div class="space-y-1.5">
-					<Label>카테고리</Label>
+				<div class="space-y-2">
+					<Label class="text-[13px] font-bold text-foreground">카테고리</Label>
 					<Input bind:value={storeCategory} />
 				</div>
-				<div class="space-y-1.5">
-					<Label>연락처</Label>
+				<div class="space-y-2">
+					<Label class="text-[13px] font-bold text-foreground">연락처</Label>
 					<Input bind:value={storeContact} />
 				</div>
-				<div class="flex gap-2.5">
+				<div class="flex gap-2.5 pt-1">
 					<Button type="submit" class="flex-1" disabled={saving}>
 						{saving ? '저장 중...' : '저장'}
 					</Button>
@@ -107,25 +109,27 @@
 			</form>
 		</div>
 	{:else if store}
-		<div class="rounded-xl bg-card ring-1 ring-border px-4 py-4 space-y-3">
+		<div class="space-y-3 rounded-2xl bg-card px-5 py-5 ring-1 ring-border">
 			<div class="flex items-center justify-between">
-				<h2 class="text-sm font-semibold text-foreground">매장 정보</h2>
-				<button class="text-sm text-primary hover:underline underline-offset-2" onclick={startEdit}>수정</button>
+				<h2 class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">매장 정보</h2>
+				<button class="text-[13px] font-semibold text-primary underline-offset-2 hover:underline" onclick={startEdit}>
+					수정
+				</button>
 			</div>
-			<div class="space-y-1.5 text-sm">
-				<div class="flex justify-between">
+			<div class="space-y-2.5">
+				<div class="flex justify-between text-[14px]">
 					<span class="text-muted-foreground">매장명</span>
-					<span class="text-foreground font-medium">{store.name}</span>
+					<span class="font-semibold text-foreground">{store.name}</span>
 				</div>
-				<div class="flex justify-between">
+				<div class="flex justify-between text-[14px]">
 					<span class="text-muted-foreground">지역</span>
 					<span class="text-foreground">{store.region ?? '-'}</span>
 				</div>
-				<div class="flex justify-between">
+				<div class="flex justify-between text-[14px]">
 					<span class="text-muted-foreground">카테고리</span>
 					<span class="text-foreground">{store.category ?? '-'}</span>
 				</div>
-				<div class="flex justify-between">
+				<div class="flex justify-between text-[14px]">
 					<span class="text-muted-foreground">연락처</span>
 					<span class="text-foreground">{store.contact ?? '-'}</span>
 				</div>

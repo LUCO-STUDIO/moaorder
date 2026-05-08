@@ -76,10 +76,12 @@
 	<title>공구관리 - 모아오더</title>
 </svelte:head>
 
-<div class="px-5 pt-6 pb-8 space-y-5 max-w-3xl">
+<div class="mx-auto max-w-3xl space-y-5 px-5 pt-6 pb-8">
 	<!-- Header -->
-	<div class="flex items-center justify-between">
-		<h1 class="text-2xl font-bold text-foreground">공구관리</h1>
+	<div class="flex items-end justify-between gap-3">
+		<h1 class="text-[26px] font-bold leading-tight tracking-[-0.03em] text-foreground sm:text-[32px]">
+			공구 관리
+		</h1>
 		<Button href="/owner/groups/create" size="sm">
 			<svg class="size-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
 				<path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
@@ -89,11 +91,11 @@
 	</div>
 
 	<!-- Filter tabs -->
-	<div class="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+	<div class="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
 		{#each filterTabs as tab}
 			<button
-				class="shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium whitespace-nowrap transition-colors {statusFilter === tab.value
-					? 'bg-primary text-primary-foreground'
+				class="shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-[13px] font-bold transition-colors {statusFilter === tab.value
+					? 'bg-foreground text-background'
 					: 'bg-muted text-muted-foreground hover:text-foreground'}"
 				onclick={() => { statusFilter = tab.value; }}
 			>
@@ -104,19 +106,21 @@
 
 	{#if loading}
 		<!-- Skeleton -->
-		{#each [0, 1, 2, 3] as _}
-			<div class="rounded-xl bg-muted animate-pulse h-20"></div>
-		{/each}
+		<div class="space-y-2.5">
+			{#each [0, 1, 2, 3] as _}
+				<div class="h-20 animate-pulse rounded-2xl bg-muted"></div>
+			{/each}
+		</div>
 	{:else if groups.length === 0}
 		<!-- Empty state -->
-		<div class="flex flex-col items-center gap-4 rounded-xl border border-dashed border-border bg-card py-14 text-center">
-			<div class="text-3xl">📦</div>
-			<div class="space-y-1">
-				<p class="text-sm font-semibold text-foreground">
-					{statusFilter ? '해당 상태의 공구가 없습니다' : '등록된 공구가 없습니다'}
+		<div class="flex flex-col items-center gap-4 rounded-2xl bg-muted/30 px-6 py-14 text-center">
+			<div class="text-4xl">📦</div>
+			<div class="space-y-1.5">
+				<p class="text-[15px] font-bold text-foreground">
+					{statusFilter ? '해당 상태의 공구가 없어요' : '아직 공구가 없어요'}
 				</p>
 				{#if !statusFilter}
-					<p class="text-xs text-muted-foreground">새 공구를 만들어보세요!</p>
+					<p class="text-[13px] text-muted-foreground">첫 공구를 만들어 시작해보세요</p>
 				{/if}
 			</div>
 			{#if !statusFilter}
@@ -128,25 +132,25 @@
 			{#each groups as group}
 				<a
 					href="/owner/groups/{group.id}"
-					class="flex items-center gap-3.5 rounded-xl bg-card ring-1 ring-border px-4 py-3.5 hover:ring-primary/30 transition-all active:scale-[0.99]"
+					class="flex items-center gap-4 rounded-2xl bg-card px-4 py-4 ring-1 ring-border transition-all hover:ring-primary/30 active:scale-[0.99]"
 				>
 					<!-- Thumbnail -->
 					{#if group.image_url}
-						<img src={group.image_url} alt="" class="h-14 w-14 rounded-lg object-cover shrink-0" />
+						<img src={group.image_url} alt="" class="h-14 w-14 shrink-0 rounded-xl object-cover" />
 					{:else}
-						<div class="h-14 w-14 rounded-lg bg-muted flex items-center justify-center text-xl shrink-0">📦</div>
+						<div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-muted text-xl">📦</div>
 					{/if}
 
 					<!-- Info -->
-					<div class="flex-1 min-w-0">
-						<div class="flex items-center gap-2 mb-0.5">
-							<Badge variant={statusConfig[group.status]?.variant ?? 'secondary'} class="text-[10px] h-4">
+					<div class="min-w-0 flex-1">
+						<div class="mb-1 flex items-center gap-2">
+							<Badge variant={statusConfig[group.status]?.variant ?? 'secondary'} class="h-4 text-[10px]">
 								{statusConfig[group.status]?.label ?? group.status}
 							</Badge>
 						</div>
-						<p class="text-sm font-semibold text-foreground truncate">{group.product_name}</p>
-						<div class="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-							<span>{formatPrice(group.price)}원</span>
+						<p class="truncate text-[14px] font-bold text-foreground">{group.product_name}</p>
+						<div class="mt-1 flex items-center gap-2 text-[12px] text-muted-foreground">
+							<span class="font-semibold text-foreground">{formatPrice(group.price)}원</span>
 							{#if group.max_quantity}
 								<span>·</span>
 								<span>잔여 {group.remaining_qty ?? 0}/{group.max_quantity}</span>
@@ -154,7 +158,7 @@
 						</div>
 					</div>
 
-					<svg class="size-4 text-muted-foreground shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+					<svg class="size-4 shrink-0 text-muted-foreground" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
 					</svg>
 				</a>
@@ -162,7 +166,7 @@
 		</div>
 
 		{#if total > groups.length}
-			<p class="text-center text-xs text-muted-foreground pt-1">총 {total}개 중 {groups.length}개 표시</p>
+			<p class="pt-1 text-center text-[12px] text-muted-foreground">총 {total}개 중 {groups.length}개 표시</p>
 		{/if}
 	{/if}
 </div>

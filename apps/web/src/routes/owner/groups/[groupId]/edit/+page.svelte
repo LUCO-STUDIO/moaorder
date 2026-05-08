@@ -86,68 +86,70 @@
 	<title>공구 수정 - 모아오더</title>
 </svelte:head>
 
-<div class="px-5 pt-6 pb-10 max-w-lg space-y-6">
+<div class="mx-auto max-w-lg space-y-6 px-5 pt-6 pb-10">
 	{#if loading}
 		<div class="space-y-3">
-			<div class="h-8 w-32 bg-muted animate-pulse rounded-lg"></div>
+			<div class="h-8 w-32 animate-pulse rounded-lg bg-muted"></div>
 			{#each [0, 1, 2, 3] as _}
-				<div class="h-14 bg-muted animate-pulse rounded-xl"></div>
+				<div class="h-14 animate-pulse rounded-2xl bg-muted"></div>
 			{/each}
 		</div>
 	{:else if !group}
-		<div class="flex flex-col items-center gap-3 py-16 text-center">
+		<div class="flex flex-col items-center gap-4 rounded-2xl bg-muted/30 px-6 py-14 text-center">
 			<div class="text-4xl">⚠️</div>
-			<p class="text-sm text-foreground">공구를 찾을 수 없습니다</p>
+			<p class="text-[15px] font-bold text-foreground">공구를 찾을 수 없어요</p>
 		</div>
 	{:else}
-		<h1 class="text-2xl font-bold text-foreground">공구 수정</h1>
+		<h1 class="text-[26px] font-bold leading-tight tracking-[-0.03em] text-foreground sm:text-[32px]">
+			공구 수정
+		</h1>
 
 		{#if error}
-			<div class="rounded-xl bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
+			<div class="rounded-xl bg-destructive/10 px-4 py-3 text-[13px] font-semibold text-destructive ring-1 ring-destructive/20">
 				{error}
 			</div>
 		{/if}
 
 		<form onsubmit={(e) => { e.preventDefault(); handleSubmit(); }} class="space-y-5">
-			<div class="space-y-1.5">
-				<Label for="edit-name">상품명</Label>
+			<div class="space-y-2">
+				<Label for="edit-name" class="text-[13px] font-bold text-foreground">상품명</Label>
 				<Input id="edit-name" bind:value={productName} required />
 			</div>
-			<div class="space-y-1.5">
-				<Label for="edit-price">가격 (원)</Label>
+			<div class="space-y-2">
+				<Label for="edit-price" class="text-[13px] font-bold text-foreground">가격 (원)</Label>
 				<Input id="edit-price" type="number" bind:value={price} min="1" required />
 			</div>
-			<div class="space-y-1.5">
-				<Label for="edit-closes">마감 시간</Label>
+			<div class="space-y-2">
+				<Label for="edit-closes" class="text-[13px] font-bold text-foreground">마감 시간</Label>
 				<input
 					id="edit-closes"
 					type="datetime-local"
-					class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-colors"
+					class="flex h-12 w-full rounded-xl border border-input bg-background px-4 text-[14px] outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
 					bind:value={closesAt}
 					required
 				/>
 			</div>
-			<div class="space-y-1.5">
-				<Label for="edit-desc">상품 설명</Label>
+			<div class="space-y-2">
+				<Label for="edit-desc" class="text-[13px] font-bold text-foreground">상품 설명</Label>
 				<textarea
 					id="edit-desc"
-					class="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none resize-none transition-colors"
+					class="w-full resize-none rounded-xl border border-input bg-background px-4 py-3 text-[14px] outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
 					rows="3"
 					bind:value={description}
 				></textarea>
 			</div>
 			{#if group.type === 'group_buy'}
-				<div class="space-y-1.5">
-					<Label for="edit-min">최소 수량</Label>
+				<div class="space-y-2">
+					<Label for="edit-min" class="text-[13px] font-bold text-foreground">최소 수량</Label>
 					<Input id="edit-min" type="number" bind:value={minQuantity} min="1" />
 				</div>
 			{/if}
-			<div class="space-y-1.5">
-				<Label for="edit-max">판매 가능 수량</Label>
+			<div class="space-y-2">
+				<Label for="edit-max" class="text-[13px] font-bold text-foreground">판매 가능 수량</Label>
 				<Input id="edit-max" type="number" bind:value={maxQuantity} min="1" />
 			</div>
 
-			<div class="flex gap-3">
+			<div class="flex gap-3 pt-1">
 				<Button type="button" variant="outline" class="flex-1" onclick={() => goto(`/owner/groups/${groupId}`)}>취소</Button>
 				<Button type="submit" class="flex-1" disabled={saving}>
 					{saving ? '저장 중...' : '저장'}
