@@ -88,16 +88,18 @@
 	<title>주문내역 - 모아오더</title>
 </svelte:head>
 
-<div class="px-4 pt-5 pb-2">
-	<h1 class="text-xl font-bold text-foreground">주문내역</h1>
+<div class="px-4 pt-6 pb-4 md:px-0 md:pt-10">
+	<h1 class="text-[26px] font-bold leading-tight tracking-[-0.03em] text-foreground sm:text-[32px]">
+		주문 내역
+	</h1>
 </div>
 
 <!-- Tabs -->
-<div class="sticky top-0 z-10 flex border-b border-border bg-background px-4">
+<div class="flex border-b border-border px-4 md:px-0">
 	{#each [{ key: 'active', label: '진행중' }, { key: 'completed', label: '완료' }] as t}
 		<button
-			class="flex-1 py-3 text-sm font-medium transition-colors {tab === t.key
-				? 'border-b-2 border-primary text-primary'
+			class="flex-1 py-3.5 text-[14px] font-semibold transition-colors {tab === t.key
+				? 'border-b-2 border-foreground text-foreground'
 				: 'text-muted-foreground hover:text-foreground'}"
 			onclick={() => switchTab(t.key as 'active' | 'completed')}
 		>
@@ -106,7 +108,7 @@
 	{/each}
 </div>
 
-<div class="px-4 py-4 space-y-3">
+<div class="space-y-3 px-4 py-5 md:px-0">
 	{#if loading}
 		<!-- Skeleton -->
 		{#each [0, 1, 2] as _}
@@ -114,16 +116,14 @@
 		{/each}
 	{:else if items.length === 0}
 		<!-- Empty state -->
-		<div class="flex flex-col items-center gap-3 py-16 text-center">
-			<div class="flex h-16 w-16 items-center justify-center rounded-full bg-muted text-2xl">
-				📋
-			</div>
-			<div class="space-y-1">
-				<p class="text-sm font-semibold text-foreground">
+		<div class="flex flex-col items-center gap-4 rounded-2xl bg-muted/30 px-6 py-14 text-center">
+			<div class="text-4xl">📋</div>
+			<div class="space-y-1.5">
+				<p class="text-[15px] font-bold text-foreground">
 					{tab === 'active' ? '진행 중인 주문이 없어요' : '완료된 주문이 없어요'}
 				</p>
-				<p class="text-xs text-muted-foreground">
-					{tab === 'active' ? '공구 링크로 첫 주문을 해보세요!' : '완료된 주문이 여기 표시됩니다'}
+				<p class="text-[13px] text-muted-foreground">
+					{tab === 'active' ? '공구 링크로 첫 주문을 해보세요' : '완료된 주문이 여기 표시돼요'}
 				</p>
 			</div>
 		</div>
