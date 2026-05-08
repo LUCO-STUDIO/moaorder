@@ -60,14 +60,9 @@ def async_client():
 
 async def _login_and_onboard_owner(client: AsyncClient) -> tuple[str, str]:
     """Login + onboard owner. Returns (token, store_id)."""
-    kakao_info = _make_kakao_info()
-    with patch(
-        "app.api.auth.exchange_kakao_code",
-        new_callable=AsyncMock,
-        return_value=kakao_info,
-    ):
-        resp = await client.post("/api/auth/kakao/exchange", json={"code": "code"})
-    token = resp.cookies["moaorder_token"]
+    from tests.conftest import kakao_login
+
+    token = await kakao_login(client)
 
     onboard = await client.post(
         "/api/onboarding/owner",
@@ -88,14 +83,9 @@ async def _login_and_onboard_owner(client: AsyncClient) -> tuple[str, str]:
 
 async def _login_and_onboard_customer(client: AsyncClient) -> str:
     """Login + onboard customer. Returns token."""
-    kakao_info = _make_kakao_info()
-    with patch(
-        "app.api.auth.exchange_kakao_code",
-        new_callable=AsyncMock,
-        return_value=kakao_info,
-    ):
-        resp = await client.post("/api/auth/kakao/exchange", json={"code": "code"})
-    token = resp.cookies["moaorder_token"]
+    from tests.conftest import kakao_login
+
+    token = await kakao_login(client)
 
     onboard = await client.post(
         "/api/onboarding/customer",

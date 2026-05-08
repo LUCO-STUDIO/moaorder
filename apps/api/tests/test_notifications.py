@@ -80,14 +80,9 @@ def async_client():
 
 
 async def _login(client: AsyncClient, kakao_id: str | None = None) -> str:
-    info = {
-        "kakao_id": kakao_id or _make_kakao_id(),
-        "nickname": "테스트유저",
-        "profile_image": None,
-    }
-    with patch("app.api.auth.exchange_kakao_code", new_callable=AsyncMock, return_value=info):
-        resp = await client.post("/api/auth/kakao/exchange", json={"code": "code"})
-    return resp.cookies["moaorder_token"]
+    from tests.conftest import kakao_login
+
+    return await kakao_login(client, kakao_id=kakao_id)
 
 
 async def _setup_owner(client: AsyncClient) -> tuple[str, str, str]:
