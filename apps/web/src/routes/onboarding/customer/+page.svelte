@@ -40,31 +40,39 @@
 	<title>프로필 설정 - 모아오더</title>
 </svelte:head>
 
-<main class="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 px-5 py-12">
-	<div class="w-full max-w-sm space-y-8">
+<main class="flex min-h-screen flex-col bg-background px-5 py-12">
+	<div class="mx-auto w-full max-w-sm space-y-8">
 		<!-- Header -->
-		<div class="space-y-1.5">
-			<h1 class="text-2xl font-bold text-foreground">프로필 설정</h1>
-			<p class="text-sm text-muted-foreground">닉네임을 설정하고 시작해보세요</p>
+		<div class="space-y-2">
+			<h1 class="text-[26px] font-bold leading-tight tracking-[-0.03em] text-foreground sm:text-[30px]">
+				프로필 설정
+			</h1>
+			<p class="text-[14px] leading-relaxed text-muted-foreground">닉네임을 설정하고 시작해보세요</p>
 		</div>
 
 		<!-- Form -->
 		<form class="space-y-5" onsubmit={handleSubmit}>
-			<div class="space-y-1.5">
-				<Label for="nickname">닉네임 <span class="text-primary">*</span></Label>
+			<div class="space-y-2">
+				<Label for="nickname" class="text-[13px] font-bold text-foreground">
+					닉네임 <span class="text-primary">*</span>
+				</Label>
 				<Input id="nickname" placeholder="닉네임을 입력하세요" bind:value={nickname} required />
 			</div>
-			<div class="space-y-1.5">
-				<Label for="region">지역 <span class="text-muted-foreground text-xs">(선택)</span></Label>
+			<div class="space-y-2">
+				<Label for="region" class="text-[13px] font-bold text-foreground">
+					지역 <span class="text-[11px] font-medium text-muted-foreground">(선택)</span>
+				</Label>
 				<Input id="region" placeholder="예: 서울 강남구" bind:value={region} />
 			</div>
-			<div class="space-y-1.5">
-				<Label for="category">관심 카테고리 <span class="text-muted-foreground text-xs">(선택)</span></Label>
+			<div class="space-y-2">
+				<Label for="category" class="text-[13px] font-bold text-foreground">
+					관심 카테고리 <span class="text-[11px] font-medium text-muted-foreground">(선택)</span>
+				</Label>
 				<Input id="category" placeholder="예: 베이커리, 농산물" bind:value={category} />
 			</div>
 
 			{#if error}
-				<div class="rounded-lg bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
+				<div class="rounded-xl bg-destructive/10 px-4 py-3 text-[13px] font-semibold text-destructive ring-1 ring-destructive/20">
 					{error}
 				</div>
 			{/if}
@@ -76,7 +84,7 @@
 
 		<div class="text-center">
 			<button
-				class="text-sm text-muted-foreground hover:text-primary transition-colors underline-offset-2 hover:underline"
+				class="text-[13px] font-semibold text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline"
 				onclick={() => goto('/onboarding/owner')}
 			>
 				사장님이신가요? 매장 등록하기

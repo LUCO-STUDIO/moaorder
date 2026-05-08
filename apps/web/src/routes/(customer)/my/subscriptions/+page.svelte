@@ -53,26 +53,26 @@
 	<h1 class="ml-2 text-base font-semibold text-foreground">매장 구독 관리</h1>
 </div>
 
-<div class="px-4 py-4 space-y-3">
+<div class="space-y-2.5 px-5 py-5">
 	{#if loading}
 		{#each [0, 1, 2] as _}
-			<div class="h-16 rounded-xl bg-muted animate-pulse"></div>
+			<div class="h-16 animate-pulse rounded-2xl bg-muted"></div>
 		{/each}
 	{:else if subscriptions.length === 0}
-		<div class="flex flex-col items-center gap-3 py-16 text-center">
-			<div class="text-3xl">🏪</div>
-			<div class="space-y-1">
-				<p class="text-sm font-semibold text-foreground">구독 중인 매장이 없어요</p>
-				<p class="text-xs text-muted-foreground">공구에 참여하면 자동으로 매장이 구독됩니다</p>
+		<div class="flex flex-col items-center gap-4 rounded-2xl bg-muted/30 px-6 py-14 text-center">
+			<div class="text-4xl">🏪</div>
+			<div class="space-y-1.5">
+				<p class="text-[15px] font-bold text-foreground">구독 중인 매장이 없어요</p>
+				<p class="text-[13px] text-muted-foreground">공구에 참여하면 자동으로 매장이 구독돼요</p>
 			</div>
 		</div>
 	{:else}
 		{#each subscriptions as sub}
-			<div class="flex items-center justify-between rounded-xl bg-card ring-1 ring-border px-4 py-3.5">
-				<div class="space-y-0.5">
-					<p class="text-sm font-semibold text-foreground">{sub.store_name}</p>
+			<div class="flex items-center justify-between gap-3 rounded-2xl bg-card px-5 py-4 ring-1 ring-border">
+				<div class="min-w-0 space-y-1">
+					<p class="truncate text-[14px] font-bold text-foreground">{sub.store_name}</p>
 					{#if sub.store_category}
-						<p class="text-xs text-muted-foreground">{sub.store_category}</p>
+						<p class="text-[12px] text-muted-foreground">{sub.store_category}</p>
 					{/if}
 				</div>
 				<Button variant="outline" size="sm" onclick={() => handleUnsubscribe(sub.store_id, sub.store_name)}>
