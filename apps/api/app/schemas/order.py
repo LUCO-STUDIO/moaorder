@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class OrderResponse(BaseModel):
@@ -89,6 +89,12 @@ class ReduceRequest(BaseModel):
 
 class CancelRequestBody(BaseModel):
     reason: Optional[str] = None
+
+
+class OwnerRefundRequest(BaseModel):
+    """Owner-initiated full refund. `reason` is required for audit/notification."""
+
+    reason: str = Field(..., min_length=1, max_length=200)
 
 
 class OwnerOrderItem(BaseModel):

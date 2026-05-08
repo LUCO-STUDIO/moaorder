@@ -36,7 +36,7 @@ async def process_partial_refund(order: Order, refund_amount: int) -> str | None
     return order.payment_id
 
 
-async def process_full_refund(order: Order) -> str | None:
+async def process_full_refund(order: Order, reason: str = "고객 요청 전체 취소") -> str | None:
     """Call PortOne V2 full cancel API.
 
     Returns the cancellation ID (or payment_id as fallback).
@@ -49,7 +49,7 @@ async def process_full_refund(order: Order) -> str | None:
         resp = await client.post(
             f"{PORTONE_API_BASE}/payments/{order.payment_id}/cancel",
             headers={"Authorization": f"PortOne {settings.PORTONE_API_SECRET}"},
-            json={"reason": "고객 요청 전체 취소"},
+            json={"reason": reason},
             timeout=15.0,
         )
 
