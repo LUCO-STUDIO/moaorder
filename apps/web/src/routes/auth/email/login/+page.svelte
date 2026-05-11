@@ -100,6 +100,7 @@
 			);
 			const me = await api.get<AuthUser>('/auth/me');
 			setUser(me);
+			localStorage.setItem('moaorder:last_login_method', 'email');
 			goto('/');
 		} catch (err: unknown) {
 			handleApiError(err, { fallbackTitle: '로그인 실패' });
