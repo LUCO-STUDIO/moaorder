@@ -20,6 +20,7 @@ class PickingSlotGroup(BaseModel):
 
 class PickingListResponse(BaseModel):
     group_id: str
+    group_status: str
     product_name: str
     total_quantity: int
     items: list[PickingItem]

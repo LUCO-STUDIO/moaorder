@@ -242,6 +242,7 @@ async def get_picking_list(
 
     return PickingListResponse(
         group_id=str(group.id),
+        group_status=group.status,
         product_name=group.product_name,
         total_quantity=total_quantity,
         items=items,

@@ -562,9 +562,37 @@ class TestPickingList:
         assert picking_resp.status_code == 200
         data = picking_resp.json()
         assert data["group_id"] == group_id
+        # group_status drives FE UI: 'closed' = still need to flip to pickup_ready
+        # before per-item 수령 buttons should be enabled.
+        assert data["group_status"] == "closed"
         assert data["total_quantity"] == 3
         assert len(data["items"]) == 1
         assert data["items"][0]["quantity"] == 3
+
+    @pytest.mark.asyncio
+    async def test_picking_list_reports_pickup_ready_after_transition(
+        self, async_client: AsyncClient
+    ):
+        owner_token, _, group_id = await _create_owner(async_client)
+        customer_token = await _create_customer(async_client)
+        await _place_order(async_client, group_id, customer_token, quantity=2)
+
+        # Close → confirmed, then pickup-ready
+        await async_client.post(
+            f"/api/groups/{group_id}/close",
+            cookies={"moaorder_token": owner_token},
+        )
+        await async_client.post(
+            f"/api/groups/{group_id}/pickup-ready",
+            cookies={"moaorder_token": owner_token},
+        )
+
+        picking_resp = await async_client.get(
+            f"/api/groups/{group_id}/picking-list",
+            cookies={"moaorder_token": owner_token},
+        )
+        assert picking_resp.status_code == 200
+        assert picking_resp.json()["group_status"] == "pickup_ready"
 
     @pytest.mark.asyncio
     async def test_owner_orders_list_includes_crm_fields(

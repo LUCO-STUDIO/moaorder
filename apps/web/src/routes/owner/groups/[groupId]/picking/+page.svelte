@@ -22,6 +22,7 @@
 
 	type PickingList = {
 		group_id: string;
+		group_status: string;
 		product_name: string;
 		total_quantity: number;
 		items: PickingItem[];
@@ -37,8 +38,22 @@
 	let showOnlyUnpicked = $state(false);
 	let searchQuery = $state('');
 	let completeLoading = $state(false);
+	let pickupReadyLoading = $state(false);
 
 	onMount(loadPickingList);
+
+	async function setPickupReady() {
+		pickupReadyLoading = true;
+		try {
+			await api.post(`/groups/${groupId}/pickup-ready`);
+			await loadPickingList();
+			toast.success('수령 가능 상태로 전환했어요. 고객에게 알림이 발송됩니다.');
+		} catch (e: unknown) {
+			toast.error(e instanceof Error ? e.message : '상태 변경에 실패했습니다');
+		} finally {
+			pickupReadyLoading = false;
+		}
+	}
 
 	async function loadPickingList() {
 		try {
@@ -126,6 +141,30 @@
 			</p>
 		</div>
 
+		<!-- Stage banner: closed → pickup_ready transition needed -->
+		{#if data.group_status === 'closed'}
+			<div class="space-y-3 rounded-2xl bg-amber-50 px-5 py-4 ring-1 ring-amber-100">
+				<div class="space-y-1">
+					<p class="text-[14px] font-bold text-amber-900">아직 준비 단계예요</p>
+					<p class="text-[13px] leading-relaxed text-amber-800/80">
+						상품 준비가 끝났으면 수령 가능 상태로 전환하세요. 고객에게 알림이 발송되고, 그 다음부터 수령 처리를 시작할 수 있어요.
+					</p>
+				</div>
+				<button
+					type="button"
+					onclick={setPickupReady}
+					disabled={pickupReadyLoading}
+					class="w-full rounded-xl bg-amber-600 px-4 py-2.5 text-[14px] font-bold text-white transition-colors hover:bg-amber-700 disabled:opacity-60"
+				>
+					{pickupReadyLoading ? '전환 중...' : '수령 가능으로 변경'}
+				</button>
+			</div>
+		{:else if data.group_status === 'done'}
+			<div class="rounded-2xl bg-muted/40 px-5 py-4 text-[13px] text-muted-foreground">
+				공구가 완료되어 더 이상 수령 처리할 수 없어요. 기록만 확인할 수 있습니다.
+			</div>
+		{/if}
+
 		<!-- Progress bar -->
 		<div class="space-y-3 rounded-2xl bg-card px-5 py-5 ring-1 ring-border">
 			<div class="flex items-center justify-between">
@@ -207,7 +246,7 @@
 </div>
 
 <!-- Fixed bottom CTA -->
-{#if data}
+{#if data && data.group_status === 'pickup_ready'}
 	<div class="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-sm px-5 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] md:left-60">
 		<Button class="w-full max-w-2xl" size="lg" onclick={completeGroup} disabled={completeLoading}>
 			{completeLoading ? '처리 중...' : '공구 전체 완료'}
@@ -231,7 +270,7 @@
 				{/if}
 			</div>
 		</div>
-		{#if !item.is_picked_up}
+		{#if !item.is_picked_up && data?.group_status === 'pickup_ready'}
 			<button
 				onclick={() => markPickedUp(item.order_id)}
 				disabled={actionLoading[item.order_id]}
