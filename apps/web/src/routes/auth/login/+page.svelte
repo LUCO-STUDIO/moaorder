@@ -174,7 +174,7 @@
 		<div class="flex items-center gap-2 text-xs sm:text-[13px]">
 			<a href="/legal/terms" class="transition-colors hover:text-foreground">이용약관</a>
 			<span class="text-border">|</span>
-			<a href="/legal/privacy" class="transition-colors hover:text-foreground">개인정보처리방침</a>
+			<a href="/legal/privacy" class="font-semibold text-foreground transition-colors hover:opacity-80">개인정보처리방침</a>
 		</div>
 	</footer>
 </div>
