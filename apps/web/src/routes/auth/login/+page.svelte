@@ -74,7 +74,7 @@
 					</a>
 				</div>
 
-				<div class="flex justify-center gap-5">
+				<div class="!mt-10 flex justify-center gap-5">
 					<div class="relative">
 						{#if lastLoginMethod === 'kakao'}
 							<div class="absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-foreground px-3 py-1.5 text-xs text-background">
