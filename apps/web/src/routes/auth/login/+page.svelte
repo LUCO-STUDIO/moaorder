@@ -63,7 +63,7 @@
 					{#if lastLoginMethod === 'email'}
 						<div class="flex justify-end pr-4">
 							<div class="relative rounded-md bg-foreground px-3.5 py-2 text-[13px] font-medium text-background">
-								최근에 사용했어요
+								마지막으로 로그인한 수단이에요
 								<span class="absolute -bottom-2 right-6 h-0 w-0 border-x-[5px] border-t-[8px] border-x-transparent border-t-foreground"></span>
 							</div>
 						</div>
@@ -82,7 +82,7 @@
 					<div class="relative">
 						{#if lastLoginMethod === 'kakao'}
 							<div class="absolute -top-11 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-foreground px-3.5 py-2 text-[13px] font-medium text-background">
-								최근에 사용했어요
+								마지막으로 로그인한 수단이에요
 								<span class="absolute -bottom-2 left-1/2 h-0 w-0 -translate-x-1/2 border-x-[5px] border-t-[8px] border-x-transparent border-t-foreground"></span>
 							</div>
 						{/if}
@@ -103,7 +103,7 @@
 					<div class="relative">
 						{#if lastLoginMethod === 'naver'}
 							<div class="absolute -top-11 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-foreground px-3.5 py-2 text-[13px] font-medium text-background">
-								최근에 사용했어요
+								마지막으로 로그인한 수단이에요
 								<span class="absolute -bottom-2 left-1/2 h-0 w-0 -translate-x-1/2 border-x-[5px] border-t-[8px] border-x-transparent border-t-foreground"></span>
 							</div>
 						{/if}
@@ -124,7 +124,7 @@
 					<div class="relative">
 						{#if lastLoginMethod === 'google'}
 							<div class="absolute -top-11 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-foreground px-3.5 py-2 text-[13px] font-medium text-background">
-								최근에 사용했어요
+								마지막으로 로그인한 수단이에요
 								<span class="absolute -bottom-2 left-1/2 h-0 w-0 -translate-x-1/2 border-x-[5px] border-t-[8px] border-x-transparent border-t-foreground"></span>
 							</div>
 						{/if}
