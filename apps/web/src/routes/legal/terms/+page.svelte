@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { IconChevronLeft } from '@tabler/icons-svelte';
+	import { IconChevronDown, IconChevronLeft, IconDownload } from '@tabler/icons-svelte';
 	import termsText from '$lib/legal/terms.txt?raw';
 
 	function parseBlocks(text: string) {
@@ -13,6 +13,7 @@
 	}
 
 	const blocks = parseBlocks(termsText);
+	const effectiveDate = '2026.05.11';
 
 	function downloadFile() {
 		const blob = new Blob([termsText.trim()], { type: 'text/plain;charset=utf-8' });
@@ -34,46 +35,60 @@
 	<title>이용약관 - 모아오더</title>
 </svelte:head>
 
-<header
-	class="sticky top-0 z-10 flex h-14 items-center justify-between bg-background px-4 sm:h-[52px] sm:shadow-[0_1px_1px_0_rgba(0,0,0,0.08)] sm:px-6"
->
-	<button
-		type="button"
-		onclick={goBack}
-		aria-label="이전으로"
-		class="flex size-10 cursor-pointer items-center justify-center -ml-2 text-foreground transition-colors hover:text-primary"
-	>
-		<IconChevronLeft size={26} stroke={2} />
-	</button>
-	<button
-		type="button"
-		onclick={downloadFile}
-		class="text-xs font-medium text-muted-foreground hover:text-foreground"
-	>
-		다운로드
-	</button>
-</header>
+<div class="min-h-screen bg-background">
+	<header class="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
+		<button
+			type="button"
+			onclick={goBack}
+			aria-label="이전으로"
+			class="-ml-2 flex size-10 items-center justify-center text-foreground transition-colors hover:text-primary"
+		>
+			<IconChevronLeft size={26} stroke={2} />
+		</button>
+		<button
+			type="button"
+			onclick={downloadFile}
+			class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:text-sm"
+		>
+			<IconDownload class="size-4" />
+			다운로드
+		</button>
+	</header>
 
-<main class="bg-background px-6 pt-6 pb-16 sm:px-8">
-	<div class="mx-auto w-full max-w-2xl">
-		<h1 class="text-[26px] font-bold leading-snug text-foreground sm:text-[32px]">이용약관</h1>
-		<div class="mt-8 space-y-6 text-[14px] leading-relaxed text-foreground">
-			{#each blocks as block}
-				<section class="space-y-2">
-					{#if block.body.length > 0}
-						<h2 class="text-[15px] font-bold text-foreground">{block.header}</h2>
-						{#each block.body as line}
-							{#if line.startsWith('- ')}
-								<p class="pl-3 text-muted-foreground">{line}</p>
-							{:else}
-								<p class="text-muted-foreground">{line}</p>
-							{/if}
-						{/each}
-					{:else}
-						<p class="text-muted-foreground">{block.header}</p>
-					{/if}
-				</section>
-			{/each}
+	<main class="px-6 pb-16 pt-6 sm:px-8 sm:pt-8">
+		<div class="mx-auto w-full max-w-2xl">
+			<h1 class="text-[28px] font-bold leading-tight tracking-[-0.01em] text-foreground sm:text-[34px]">
+				모아오더 이용약관
+			</h1>
+
+			<button
+				type="button"
+				class="mt-5 inline-flex items-center gap-1 rounded-md bg-muted px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted/70 sm:text-sm"
+			>
+				{effectiveDate}
+				<IconChevronDown class="size-4 text-muted-foreground" />
+			</button>
+
+			<hr class="my-8 border-border" />
+
+			<div class="space-y-7 text-[14px] leading-relaxed text-foreground sm:text-[15px]">
+				{#each blocks as block}
+					<section class="space-y-2.5">
+						{#if block.body.length > 0}
+							<h2 class="text-[15px] font-bold text-foreground sm:text-[16px]">{block.header}</h2>
+							{#each block.body as line}
+								{#if line.startsWith('- ')}
+									<p class="pl-3 text-muted-foreground">{line}</p>
+								{:else}
+									<p class="text-muted-foreground">{line}</p>
+								{/if}
+							{/each}
+						{:else}
+							<p class="text-muted-foreground">{block.header}</p>
+						{/if}
+					</section>
+				{/each}
+			</div>
 		</div>
-	</div>
-</main>
+	</main>
+</div>
