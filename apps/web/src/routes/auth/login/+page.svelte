@@ -17,7 +17,7 @@
 <div class="flex min-h-screen flex-col bg-background">
 	<main class="flex flex-1 items-center justify-center px-6">
 		<div class="w-full max-w-[360px] space-y-10">
-			<a href="/" class="inline-block text-[34px] font-black leading-none tracking-[-0.05em] text-foreground">
+			<a href="/" class="inline-block text-[34px] font-black leading-none tracking-[-0.05em] text-primary">
 				moaorder
 			</a>
 
