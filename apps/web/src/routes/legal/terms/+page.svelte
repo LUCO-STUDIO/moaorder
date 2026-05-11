@@ -29,7 +29,7 @@
 
 			<button
 				type="button"
-				class="mt-5 inline-flex items-center gap-1 rounded-md bg-muted px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted/70 sm:text-sm"
+				class="mt-5 inline-flex items-center gap-1 rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-foreground sm:text-sm"
 			>
 				{effectiveDate}
 				<IconChevronDown class="size-4 text-muted-foreground" />
