@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { IconEye, IconEyeOff } from '@tabler/icons-svelte';
 	import { api } from '$lib/api';
@@ -8,12 +9,22 @@
 
 	const KAKAO_CLIENT_ID = import.meta.env.VITE_KAKAO_CLIENT_ID ?? '';
 	const REDIRECT_URI = `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/kakao/callback`;
+	const REMEMBER_KEY = 'moaorder:remember_email';
 
 	let email = $state('');
 	let password = $state('');
 	let showPassword = $state(false);
+	let rememberEmail = $state(false);
 	let loading = $state(false);
 	let errorMessage = $state('');
+
+	onMount(() => {
+		const saved = localStorage.getItem(REMEMBER_KEY);
+		if (saved) {
+			email = saved;
+			rememberEmail = true;
+		}
+	});
 
 	const isEmailValid = $derived(
 		/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)
@@ -33,6 +44,11 @@
 			await api.post('/auth/email/login', { email, password });
 			const me = await api.get<AuthUser>('/auth/me');
 			setUser(me);
+			if (rememberEmail) {
+				localStorage.setItem(REMEMBER_KEY, email);
+			} else {
+				localStorage.removeItem(REMEMBER_KEY);
+			}
 			goto('/');
 		} catch (err: unknown) {
 			const status = (err as { status?: number })?.status;
@@ -106,6 +122,15 @@
 				{#if errorMessage}
 					<p class="text-xs text-destructive sm:text-sm">{errorMessage}</p>
 				{/if}
+
+				<label class="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground sm:text-sm">
+					<input
+						type="checkbox"
+						bind:checked={rememberEmail}
+						class="size-4 rounded border-input accent-primary"
+					/>
+					<span>이메일 기억하기</span>
+				</label>
 
 				<button
 					type="submit"
