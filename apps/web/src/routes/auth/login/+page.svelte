@@ -31,14 +31,14 @@
 <div class="flex min-h-screen flex-col bg-background">
 	<main class="flex flex-1 items-center justify-center px-4 sm:px-6">
 		<div class="w-full max-w-xs sm:max-w-sm">
-			<div class="mb-8 text-center">
+			<div class="mb-9 text-center">
 				<a
 					href="/"
 					class="inline-block text-5xl font-black leading-none tracking-tight text-primary transition-all hover:opacity-80 active:scale-[0.98]"
 				>
 					moaorder
 				</a>
-				<p class="mt-3 text-base text-muted-foreground sm:text-2xl">동네 공구를 한 곳에서</p>
+				<p class="mt-4 text-base text-muted-foreground sm:text-2xl">동네 공구를 한 곳에서</p>
 			</div>
 
 			<div class="space-y-6 sm:space-y-8">
