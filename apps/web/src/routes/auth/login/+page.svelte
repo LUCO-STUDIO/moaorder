@@ -53,14 +53,15 @@
 
 <div class="flex min-h-screen flex-col bg-background">
 	<main class="flex flex-1 items-center justify-center px-4 sm:px-6">
-		<div class="w-full max-w-xs space-y-6 sm:max-w-sm sm:space-y-8">
+		<div class="w-full max-w-xs sm:max-w-sm">
 			<a
 				href="/"
-				class="inline-block text-3xl font-black leading-none tracking-tight text-primary sm:text-4xl"
+				class="mb-10 inline-block text-3xl font-black leading-none tracking-tight text-primary sm:mb-12 sm:text-4xl"
 			>
 				moaorder
 			</a>
 
+			<div class="space-y-6 sm:space-y-8">
 			<form
 				onsubmit={(e) => {
 					e.preventDefault();
@@ -147,6 +148,7 @@
 				<a href="/auth/email/signup" class="transition-colors hover:text-foreground">회원가입</a>
 				<span class="text-border">·</span>
 				<a href="/auth/email/forgot" class="transition-colors hover:text-foreground">비밀번호 찾기</a>
+			</div>
 			</div>
 		</div>
 	</main>
