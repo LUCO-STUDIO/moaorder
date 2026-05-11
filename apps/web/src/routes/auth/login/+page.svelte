@@ -76,7 +76,7 @@
 					autocomplete="email"
 					disabled={loading}
 					aria-label="이메일"
-					class="h-11 w-full rounded-lg border border-input bg-background px-4 text-sm placeholder:text-muted-foreground/60 focus:border-foreground focus:outline-none focus:ring-0 disabled:opacity-50 sm:h-12 sm:text-base"
+					class="h-11 w-full rounded-lg border border-input bg-background px-4 text-sm placeholder:text-muted-foreground/60 hover:border-primary/40 focus:border-primary focus:outline-none focus:ring-0 disabled:opacity-50 sm:h-12 sm:text-base"
 				/>
 
 				<div class="relative">
@@ -87,7 +87,7 @@
 						autocomplete="current-password"
 						disabled={loading}
 						aria-label="비밀번호"
-						class="h-11 w-full rounded-lg border border-input bg-background px-4 pr-11 text-sm placeholder:text-muted-foreground/60 focus:border-foreground focus:outline-none focus:ring-0 disabled:opacity-50 sm:h-12 sm:pr-12 sm:text-base"
+						class="h-11 w-full rounded-lg border border-input bg-background px-4 pr-11 text-sm placeholder:text-muted-foreground/60 hover:border-primary/40 focus:border-primary focus:outline-none focus:ring-0 disabled:opacity-50 sm:h-12 sm:pr-12 sm:text-base"
 					/>
 					<button
 						type="button"
