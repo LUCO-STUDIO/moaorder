@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { IconMailFilled } from '@tabler/icons-svelte';
+	import { IconArrowLeft, IconMailFilled } from '@tabler/icons-svelte';
 	import { toast } from 'svelte-sonner';
 
 	const KAKAO_CLIENT_ID = import.meta.env.VITE_KAKAO_CLIENT_ID ?? '';
@@ -163,9 +163,15 @@
 		</div>
 	</main>
 
-	<footer class="px-4 pb-6 pt-4 text-center text-xs text-muted-foreground sm:px-6">
-		<a href="/legal/terms" class="hover:text-foreground">이용약관</a>
-		<span class="mx-2 text-border">|</span>
-		<a href="/legal/privacy" class="hover:text-foreground">개인정보처리방침</a>
+	<footer class="flex items-center justify-between px-4 pb-6 pt-4 text-xs text-muted-foreground sm:px-6">
+		<a href="/" class="inline-flex items-center gap-1 transition-colors hover:text-foreground">
+			<IconArrowLeft class="size-4" />
+			홈페이지로 이동하기
+		</a>
+		<div class="flex items-center gap-2">
+			<a href="/legal/terms" class="transition-colors hover:text-foreground">이용약관</a>
+			<span class="text-border">|</span>
+			<a href="/legal/privacy" class="transition-colors hover:text-foreground">개인정보처리방침</a>
+		</div>
 	</footer>
 </div>
