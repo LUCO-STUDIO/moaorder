@@ -166,7 +166,7 @@
 	<footer class="flex items-center justify-between border-t border-border px-4 pb-6 pt-4 text-xs text-muted-foreground sm:px-6">
 		<a
 			href="/"
-			class="inline-flex items-center gap-1 text-xs transition-colors hover:text-foreground sm:text-sm"
+			class="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted/70 sm:text-sm"
 		>
 			<IconArrowLeft class="size-4" />
 			홈페이지로 이동하기
