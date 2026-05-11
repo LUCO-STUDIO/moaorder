@@ -136,7 +136,7 @@
 					type="submit"
 					disabled={!canSubmit}
 					aria-busy={loading}
-					class="relative flex h-11 w-full cursor-pointer items-center justify-center rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground transition-all hover:brightness-95 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:brightness-100 sm:h-12 sm:text-base"
+					class="relative !mt-6 flex h-11 w-full cursor-pointer items-center justify-center rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground transition-all hover:brightness-95 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:brightness-100 sm:h-12 sm:text-base"
 				>
 					<span class={loading ? 'invisible' : ''}>로그인</span>
 					{#if loading}
