@@ -56,7 +56,7 @@
 		<div class="w-full max-w-xs sm:max-w-sm">
 			<a
 				href="/"
-				class="mb-6 inline-block text-4xl font-black leading-none tracking-tight text-primary"
+				class="mb-6 inline-block text-4xl font-black leading-none tracking-tight text-primary transition-all hover:opacity-80 active:scale-[0.98]"
 			>
 				moaorder
 			</a>
