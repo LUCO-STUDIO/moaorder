@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { IconChevronDown, IconChevronLeft, IconDownload } from '@tabler/icons-svelte';
+	import { IconChevronDown } from '@tabler/icons-svelte';
 	import termsText from '$lib/legal/terms.txt?raw';
 
 	function parseBlocks(text: string) {
@@ -14,21 +14,6 @@
 
 	const blocks = parseBlocks(termsText);
 	const effectiveDate = '2026.05.11';
-
-	function downloadFile() {
-		const blob = new Blob([termsText.trim()], { type: 'text/plain;charset=utf-8' });
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = '모아오더_이용약관.txt';
-		a.click();
-		URL.revokeObjectURL(url);
-	}
-
-	function goBack() {
-		if (window.history.length > 1) history.back();
-		else window.location.href = '/';
-	}
 </script>
 
 <svelte:head>
@@ -36,26 +21,7 @@
 </svelte:head>
 
 <div class="min-h-screen bg-background">
-	<header class="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
-		<button
-			type="button"
-			onclick={goBack}
-			aria-label="이전으로"
-			class="-ml-2 flex size-10 items-center justify-center text-foreground transition-colors hover:text-primary"
-		>
-			<IconChevronLeft size={26} stroke={2} />
-		</button>
-		<button
-			type="button"
-			onclick={downloadFile}
-			class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:text-sm"
-		>
-			<IconDownload class="size-4" />
-			다운로드
-		</button>
-	</header>
-
-	<main class="px-6 pb-16 pt-6 sm:px-8 sm:pt-8">
+	<main class="px-6 pb-16 pt-10 sm:px-8 sm:pt-16">
 		<div class="mx-auto w-full max-w-2xl">
 			<h1 class="text-[28px] font-bold leading-tight tracking-[-0.01em] text-foreground sm:text-[34px]">
 				모아오더 이용약관
