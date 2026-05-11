@@ -31,12 +31,15 @@
 <div class="flex min-h-screen flex-col bg-background">
 	<main class="flex flex-1 items-center justify-center px-4 sm:px-6">
 		<div class="w-full max-w-xs sm:max-w-sm">
-			<a
-				href="/"
-				class="mb-6 inline-block text-4xl font-black leading-none tracking-tight text-primary transition-all hover:opacity-80 active:scale-[0.98]"
-			>
-				moaorder
-			</a>
+			<div class="mb-8 text-center">
+				<a
+					href="/"
+					class="inline-block text-5xl font-black leading-none tracking-tight text-primary transition-all hover:opacity-80 active:scale-[0.98]"
+				>
+					moaorder
+				</a>
+				<p class="mt-3 text-sm text-muted-foreground">동네 공구를 한 곳에서</p>
+			</div>
 
 			<div class="space-y-6 sm:space-y-8">
 				<div class="space-y-2">
@@ -84,10 +87,13 @@
 					</div>
 				</div>
 
-				<div class="flex items-center justify-center gap-3 text-xs text-muted-foreground sm:text-sm">
-					<a href="/auth/email/signup" class="transition-colors hover:text-foreground">회원가입</a>
-					<span class="text-border">·</span>
-					<a href="/auth/email/forgot" class="transition-colors hover:text-foreground">비밀번호 찾기</a>
+				<div class="text-center">
+					<a
+						href="/auth/email/forgot"
+						class="text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground sm:text-sm"
+					>
+						로그인에 어려움을 겪고 계신가요?
+					</a>
 				</div>
 			</div>
 		</div>
