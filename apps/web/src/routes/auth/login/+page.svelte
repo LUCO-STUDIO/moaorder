@@ -163,7 +163,7 @@
 		</div>
 	</main>
 
-	<footer class="flex items-center justify-between px-4 pb-6 pt-4 text-xs text-muted-foreground sm:px-6">
+	<footer class="flex items-center justify-between border-t border-border px-4 pb-6 pt-4 text-xs text-muted-foreground sm:px-6">
 		<a href="/" class="inline-flex items-center gap-1 transition-colors hover:text-foreground">
 			<IconArrowLeft class="size-4" />
 			홈페이지로 이동하기
