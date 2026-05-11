@@ -62,7 +62,7 @@
 				<div class="space-y-2">
 					{#if lastLoginMethod === 'email'}
 						<div class="flex justify-end pr-4">
-							<div class="relative rounded-md bg-foreground px-3 py-1.5 text-xs text-background">
+							<div class="relative rounded-md bg-foreground px-3.5 py-2 text-[13px] font-medium text-background">
 								마지막으로 로그인한 수단이에요
 								<span class="absolute -bottom-1 right-6 size-2 rotate-45 bg-foreground"></span>
 							</div>
@@ -78,10 +78,10 @@
 					</a>
 				</div>
 
-				<div class="!mt-10 flex justify-center gap-5">
+				<div class="!mt-14 flex justify-center gap-5">
 					<div class="relative">
 						{#if lastLoginMethod === 'kakao'}
-							<div class="absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-foreground px-3 py-1.5 text-xs text-background">
+							<div class="absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-foreground px-3.5 py-2 text-[13px] font-medium text-background">
 								마지막으로 로그인한 수단이에요
 								<span class="absolute -bottom-1 left-1/2 size-2 -translate-x-1/2 rotate-45 bg-foreground"></span>
 							</div>
@@ -102,7 +102,7 @@
 
 					<div class="relative">
 						{#if lastLoginMethod === 'naver'}
-							<div class="absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-foreground px-3 py-1.5 text-xs text-background">
+							<div class="absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-foreground px-3.5 py-2 text-[13px] font-medium text-background">
 								마지막으로 로그인한 수단이에요
 								<span class="absolute -bottom-1 left-1/2 size-2 -translate-x-1/2 rotate-45 bg-foreground"></span>
 							</div>
@@ -123,7 +123,7 @@
 
 					<div class="relative">
 						{#if lastLoginMethod === 'google'}
-							<div class="absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-foreground px-3 py-1.5 text-xs text-background">
+							<div class="absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-foreground px-3.5 py-2 text-[13px] font-medium text-background">
 								마지막으로 로그인한 수단이에요
 								<span class="absolute -bottom-1 left-1/2 size-2 -translate-x-1/2 rotate-45 bg-foreground"></span>
 							</div>
