@@ -10,6 +10,9 @@
 	const KAKAO_CLIENT_ID = import.meta.env.VITE_KAKAO_CLIENT_ID ?? '';
 	const REDIRECT_URI = `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/kakao/callback`;
 	const REMEMBER_KEY = 'moaorder:remember_email';
+	const LAST_METHOD_KEY = 'moaorder:last_login_method';
+
+	type LoginMethod = 'email' | 'kakao';
 
 	let email = $state('');
 	let password = $state('');
@@ -19,6 +22,7 @@
 	let emailError = $state('');
 	let passwordError = $state('');
 	let errorMessage = $state('');
+	let lastLoginMethod = $state<LoginMethod | null>(null);
 
 	const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -28,9 +32,14 @@
 			email = saved;
 			rememberEmail = true;
 		}
+		const last = localStorage.getItem(LAST_METHOD_KEY);
+		if (last === 'email' || last === 'kakao') {
+			lastLoginMethod = last;
+		}
 	});
 
 	function handleKakaoLogin() {
+		localStorage.setItem(LAST_METHOD_KEY, 'kakao');
 		const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code`;
 		window.location.href = kakaoAuthUrl;
 	}
@@ -64,6 +73,7 @@
 			} else {
 				localStorage.removeItem(REMEMBER_KEY);
 			}
+			localStorage.setItem(LAST_METHOD_KEY, 'email');
 			goto('/');
 		} catch (err: unknown) {
 			const status = (err as { status?: number })?.status;
@@ -176,25 +186,31 @@
 				</button>
 			</form>
 
-			<div class="flex items-center gap-3 text-xs text-muted-foreground">
-				<span class="h-px flex-1 bg-border"></span>
-				<span>또는</span>
-				<span class="h-px flex-1 bg-border"></span>
-			</div>
+			<div class="space-y-3">
+				{#if lastLoginMethod === 'kakao'}
+					<div class="flex justify-center">
+						<div class="relative rounded-md bg-foreground px-3 py-1.5 text-xs text-background">
+							마지막으로 로그인한 수단이에요
+							<span class="absolute -bottom-1 left-1/2 size-2 -translate-x-1/2 rotate-45 bg-foreground"></span>
+						</div>
+					</div>
+				{/if}
 
-			<button
-				onclick={handleKakaoLogin}
-				class="relative flex h-11 w-full cursor-pointer items-center justify-center rounded-lg bg-[#FEE500] px-5 text-sm font-medium transition-all hover:brightness-95 active:scale-[0.99] sm:h-12 sm:text-base"
-				style="color: rgba(0, 0, 0, 0.85);"
-			>
-				<svg class="absolute left-5 size-5" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-					<path
-						d="M9 0.75C4.30547 0.75 0.5 3.7125 0.5 7.36875C0.5 9.84375 2.06719 12.0094 4.41875 13.1719L3.51875 16.4844C3.43906 16.7766 3.78125 17.0156 4.04531 16.8422L7.99844 14.225C8.32812 14.2563 8.66172 14.275 9 14.275C13.6938 14.275 17.5 11.3125 17.5 7.65625C17.5 4 13.6945 0.75 9 0.75Z"
-						fill="#000000"
-					/>
-				</svg>
-				카카오로 시작
-			</button>
+				<div class="flex justify-center gap-3">
+					<button
+						onclick={handleKakaoLogin}
+						aria-label="카카오로 로그인"
+						class="flex size-12 items-center justify-center rounded-full bg-[#FEE500] transition-all hover:brightness-95 active:scale-95"
+					>
+						<svg class="size-5" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+							<path
+								d="M9 0.75C4.30547 0.75 0.5 3.7125 0.5 7.36875C0.5 9.84375 2.06719 12.0094 4.41875 13.1719L3.51875 16.4844C3.43906 16.7766 3.78125 17.0156 4.04531 16.8422L7.99844 14.225C8.32812 14.2563 8.66172 14.275 9 14.275C13.6938 14.275 17.5 11.3125 17.5 7.65625C17.5 4 13.6945 0.75 9 0.75Z"
+								fill="#000000"
+							/>
+						</svg>
+					</button>
+				</div>
+			</div>
 
 			<div class="flex items-center justify-center gap-3 text-xs text-muted-foreground sm:text-sm">
 				<a href="/auth/email/signup" class="transition-colors hover:text-foreground">회원가입</a>
