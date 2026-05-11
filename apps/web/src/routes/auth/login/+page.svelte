@@ -52,9 +52,12 @@
 </svelte:head>
 
 <div class="flex min-h-screen flex-col bg-background">
-	<main class="flex flex-1 items-center justify-center px-6">
-		<div class="w-full max-w-[360px] space-y-8">
-			<a href="/" class="inline-block text-[34px] font-black leading-none tracking-[-0.05em] text-primary">
+	<main class="flex flex-1 items-center justify-center px-4 sm:px-6">
+		<div class="w-full max-w-xs space-y-6 sm:max-w-sm sm:space-y-8">
+			<a
+				href="/"
+				class="inline-block text-3xl font-black leading-none tracking-tight text-primary sm:text-4xl"
+			>
 				moaorder
 			</a>
 
@@ -72,7 +75,7 @@
 					autocomplete="email"
 					disabled={loading}
 					aria-label="이메일"
-					class="h-12 w-full rounded-[10px] border border-input bg-background px-4 text-[15px] placeholder:text-muted-foreground/60 focus:border-foreground focus:outline-none focus:ring-0 disabled:opacity-50"
+					class="h-11 w-full rounded-lg border border-input bg-background px-4 text-sm placeholder:text-muted-foreground/60 focus:border-foreground focus:outline-none focus:ring-0 disabled:opacity-50 sm:h-12 sm:text-base"
 				/>
 
 				<div class="relative">
@@ -83,7 +86,7 @@
 						autocomplete="current-password"
 						disabled={loading}
 						aria-label="비밀번호"
-						class="h-12 w-full rounded-[10px] border border-input bg-background px-4 pr-12 text-[15px] placeholder:text-muted-foreground/60 focus:border-foreground focus:outline-none focus:ring-0 disabled:opacity-50"
+						class="h-11 w-full rounded-lg border border-input bg-background px-4 pr-11 text-sm placeholder:text-muted-foreground/60 focus:border-foreground focus:outline-none focus:ring-0 disabled:opacity-50 sm:h-12 sm:pr-12 sm:text-base"
 					/>
 					<button
 						type="button"
@@ -92,22 +95,22 @@
 						class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
 					>
 						{#if showPassword}
-							<IconEye size={20} />
+							<IconEye class="size-5" />
 						{:else}
-							<IconEyeOff size={20} />
+							<IconEyeOff class="size-5" />
 						{/if}
 					</button>
 				</div>
 
 				{#if errorMessage}
-					<p class="text-[13px] text-destructive">{errorMessage}</p>
+					<p class="text-xs text-destructive sm:text-sm">{errorMessage}</p>
 				{/if}
 
 				<button
 					type="submit"
 					disabled={!canSubmit}
 					aria-busy={loading}
-					class="relative flex h-12 w-full cursor-pointer items-center justify-center rounded-[10px] bg-primary px-5 text-[15px] font-medium text-primary-foreground transition-all hover:brightness-95 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:brightness-100"
+					class="relative flex h-11 w-full cursor-pointer items-center justify-center rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground transition-all hover:brightness-95 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:brightness-100 sm:h-12 sm:text-base"
 				>
 					<span class={loading ? 'invisible' : ''}>로그인</span>
 					{#if loading}
@@ -120,7 +123,7 @@
 				</button>
 			</form>
 
-			<div class="flex items-center gap-3 text-[12px] text-muted-foreground">
+			<div class="flex items-center gap-3 text-xs text-muted-foreground">
 				<span class="h-px flex-1 bg-border"></span>
 				<span>또는</span>
 				<span class="h-px flex-1 bg-border"></span>
@@ -128,7 +131,7 @@
 
 			<button
 				onclick={handleKakaoLogin}
-				class="relative flex h-12 w-full cursor-pointer items-center justify-center rounded-[10px] bg-[#FEE500] px-5 text-[15px] font-medium transition-all hover:brightness-95 active:scale-[0.99]"
+				class="relative flex h-11 w-full cursor-pointer items-center justify-center rounded-lg bg-[#FEE500] px-5 text-sm font-medium transition-all hover:brightness-95 active:scale-[0.99] sm:h-12 sm:text-base"
 				style="color: rgba(0, 0, 0, 0.85);"
 			>
 				<svg class="absolute left-5 size-5" viewBox="0 0 18 18" fill="none" aria-hidden="true">
@@ -140,7 +143,7 @@
 				카카오로 시작
 			</button>
 
-			<div class="flex items-center justify-center gap-3 text-[13px] text-muted-foreground">
+			<div class="flex items-center justify-center gap-3 text-xs text-muted-foreground sm:text-sm">
 				<a href="/auth/email/signup" class="transition-colors hover:text-foreground">회원가입</a>
 				<span class="text-border">·</span>
 				<a href="/auth/email/forgot" class="transition-colors hover:text-foreground">비밀번호 찾기</a>
@@ -148,7 +151,7 @@
 		</div>
 	</main>
 
-	<footer class="px-6 pb-6 pt-4 text-center text-[12px] text-muted-foreground">
+	<footer class="px-4 pb-6 pt-4 text-center text-xs text-muted-foreground sm:px-6">
 		<a href="/legal/terms" class="hover:text-foreground">이용약관</a>
 		<span class="mx-2 text-border">|</span>
 		<a href="/legal/privacy" class="hover:text-foreground">개인정보처리방침</a>
