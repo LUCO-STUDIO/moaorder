@@ -151,7 +151,7 @@
 					</div>
 				</div>
 
-				<div class="!mt-5 text-center">
+				<div class="!mt-3 text-center">
 					<a
 						href="/auth/email/forgot"
 						class="text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground"
