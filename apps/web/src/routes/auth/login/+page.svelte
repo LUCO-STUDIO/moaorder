@@ -74,7 +74,7 @@
 					</a>
 				</div>
 
-				<div class="flex justify-center gap-3">
+				<div class="flex justify-center gap-5">
 					<div class="relative">
 						{#if lastLoginMethod === 'kakao'}
 							<div class="absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-foreground px-3 py-1.5 text-xs text-background">
@@ -108,9 +108,9 @@
 							aria-label="네이버로 로그인"
 							class="flex size-12 items-center justify-center rounded-full bg-[#03C75A] transition-all hover:brightness-95 active:scale-95 sm:size-14"
 						>
-							<svg class="size-6" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+							<svg class="size-6" viewBox="0 0 16 16" fill="none" aria-hidden="true">
 								<path
-									d="M11.66 10.36 8.21 5h-4.6v10h4.74V9.64L11.78 15h4.6V5h-4.72v5.36z"
+									d="M9.79 8.36 5.81 2H1.6v12h4.37V7.64L9.95 14h4.45V2H9.79v6.36z"
 									fill="#FFFFFF"
 								/>
 							</svg>
