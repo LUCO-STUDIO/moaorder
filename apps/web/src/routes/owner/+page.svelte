@@ -29,17 +29,48 @@
 		cancel_request_count: number;
 	}
 
+	interface PeriodBucket {
+		order_count: number;
+		revenue: number;
+	}
+
+	interface PeriodStats {
+		today: PeriodBucket;
+		this_week: PeriodBucket;
+		this_month: PeriodBucket;
+	}
+
+	interface RevenueTrendPoint {
+		date: string;
+		order_count: number;
+		revenue: number;
+	}
+
+	interface RegularCustomer {
+		user_id: string;
+		nickname: string;
+		order_count: number;
+		total_amount: number;
+		last_order_at: string;
+	}
+
 	let summary: DashboardSummary | null = $state(null);
 	let alerts: DashboardAlert | null = $state(null);
+	let periodStats: PeriodStats | null = $state(null);
+	let revenueTrend: RevenueTrendPoint[] = $state([]);
+	let regulars: RegularCustomer[] = $state([]);
 	let loading = $state(true);
 	let error = $state('');
 	let pollInterval: ReturnType<typeof setInterval>;
 
 	async function fetchDashboard() {
 		try {
-			[summary, alerts] = await Promise.all([
+			[summary, alerts, periodStats, revenueTrend, regulars] = await Promise.all([
 				api.get<DashboardSummary>('/dashboard/summary'),
-				api.get<DashboardAlert>('/dashboard/alerts')
+				api.get<DashboardAlert>('/dashboard/alerts'),
+				api.get<PeriodStats>('/dashboard/period-stats'),
+				api.get<RevenueTrendPoint[]>('/dashboard/revenue-trend?days=7'),
+				api.get<RegularCustomer[]>('/dashboard/regulars?limit=5')
 			]);
 			error = '';
 		} catch {
@@ -47,6 +78,15 @@
 		} finally {
 			loading = false;
 		}
+	}
+
+	const trendMax = $derived(
+		revenueTrend.reduce((max, p) => Math.max(max, p.revenue), 0)
+	);
+
+	function dayLabel(iso: string): string {
+		const d = new Date(`${iso}T00:00:00+09:00`);
+		return d.toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' });
 	}
 
 	function timeUntil(closesAt: string): string {
@@ -155,6 +195,77 @@
 						</svg>
 					</a>
 				{/if}
+			</section>
+		{/if}
+
+		<!-- Period stats: 오늘 / 이번 주 / 이번 달 -->
+		{#if periodStats}
+			<section class="space-y-3">
+				<h2 class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">기간별 매출</h2>
+				<div class="grid grid-cols-3 gap-3">
+					{#each [
+						{ label: '오늘', data: periodStats.today },
+						{ label: '이번 주', data: periodStats.this_week },
+						{ label: '이번 달', data: periodStats.this_month }
+					] as bucket}
+						<div class="rounded-2xl bg-card px-4 py-4 ring-1 ring-border">
+							<p class="text-[11px] font-semibold text-muted-foreground">{bucket.label}</p>
+							<p class="mt-2 text-[18px] font-bold tracking-[-0.02em] text-foreground sm:text-[20px]">
+								{bucket.data.revenue.toLocaleString()}원
+							</p>
+							<p class="mt-0.5 text-[11px] text-muted-foreground">주문 {bucket.data.order_count}건</p>
+						</div>
+					{/each}
+				</div>
+			</section>
+		{/if}
+
+		<!-- Revenue trend: last 7 days -->
+		{#if revenueTrend.length > 0}
+			<section class="space-y-3">
+				<h2 class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">최근 7일 매출 추이</h2>
+				<div class="rounded-2xl bg-card px-5 py-5 ring-1 ring-border">
+					<div class="flex h-32 items-end gap-2">
+						{#each revenueTrend as point}
+							{@const ratio = trendMax > 0 ? point.revenue / trendMax : 0}
+							<div class="flex flex-1 flex-col items-center gap-1.5">
+								<div class="flex w-full flex-1 items-end">
+									<div
+										class="w-full rounded-t-md bg-primary/80 transition-colors hover:bg-primary"
+										style="height: {Math.max(ratio * 100, point.revenue > 0 ? 4 : 0)}%"
+										title="{dayLabel(point.date)} · {point.revenue.toLocaleString()}원 · 주문 {point.order_count}건"
+									></div>
+								</div>
+								<span class="text-[10px] text-muted-foreground">{dayLabel(point.date)}</span>
+							</div>
+						{/each}
+					</div>
+				</div>
+			</section>
+		{/if}
+
+		<!-- Regulars: top customers -->
+		{#if regulars.length > 0}
+			<section class="space-y-3">
+				<h2 class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">단골 고객</h2>
+				<ul class="space-y-2.5">
+					{#each regulars as customer, i}
+						<li class="flex items-center justify-between rounded-2xl bg-card px-5 py-4 ring-1 ring-border">
+							<div class="flex items-center gap-3">
+								<span class="flex size-7 items-center justify-center rounded-full bg-primary/10 text-[12px] font-bold text-primary">
+									{i + 1}
+								</span>
+								<div>
+									<p class="text-[14px] font-bold text-foreground">{customer.nickname}</p>
+									<p class="text-[11px] text-muted-foreground">주문 {customer.order_count}회</p>
+								</div>
+							</div>
+							<p class="text-[14px] font-bold tabular-nums text-foreground">
+								{customer.total_amount.toLocaleString()}원
+							</p>
+						</li>
+					{/each}
+				</ul>
 			</section>
 		{/if}
 
