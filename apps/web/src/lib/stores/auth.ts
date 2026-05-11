@@ -12,6 +12,7 @@ export interface AuthUser {
 	category: string | null;
 	email: string | null;
 	email_verified: boolean;
+	region_verified_at: string | null;
 }
 
 const userStore = writable<AuthUser | null>(null);

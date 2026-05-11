@@ -29,6 +29,11 @@ class User(Base, UUIDPrimaryKeyMixin, TimestampMixin):
         DateTime(timezone=True), nullable=True
     )
 
+    # GPS-based region verification (Kakao Local API reverse-geocode).
+    region_verified_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
     stores: Mapped[list[Store]] = relationship(
         back_populates="owner", lazy="selectin"
     )

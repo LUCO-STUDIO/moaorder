@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     KAKAO_CLIENT_ID: str = ""
     KAKAO_CLIENT_SECRET: str = ""
     KAKAO_REDIRECT_URI: str = "http://localhost:5173/auth/kakao/callback"
+    # Kakao Local API (reverse-geocode for GPS 동네 인증). REST key, not JS key.
+    KAKAO_REST_API_KEY: str = ""
 
     # PortOne
     PORTONE_STORE_ID: str = ""

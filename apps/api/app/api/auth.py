@@ -155,4 +155,7 @@ async def get_me(
         category=current_user.category,
         email=current_user.email,
         email_verified=current_user.email_verified_at is not None,
+        region_verified_at=current_user.region_verified_at.isoformat()
+        if current_user.region_verified_at
+        else None,
     )

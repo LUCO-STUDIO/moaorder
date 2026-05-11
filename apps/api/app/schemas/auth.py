@@ -54,3 +54,4 @@ class UserResponse(BaseModel):
     category: Optional[str] = None
     email: Optional[str] = None
     email_verified: bool = False
+    region_verified_at: Optional[str] = None

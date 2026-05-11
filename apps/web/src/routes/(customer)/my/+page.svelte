@@ -3,16 +3,28 @@
 	import { user, logout, fetchMe } from '$lib/stores/auth';
 	import { api } from '$lib/api';
 	import { toast } from 'svelte-sonner';
-	import { IconChevronRight } from '@tabler/icons-svelte';
+	import { IconChevronRight, IconShieldCheck } from '@tabler/icons-svelte';
 	import { REGIONS } from '$lib/regions';
+
+	const VERIFY_FRESH_DAYS = 30;
 
 	let regionPickerOpen = $state(false);
 	let regionSearch = $state('');
 	let savingRegion = $state(false);
+	let verifyingRegion = $state(false);
 
 	const filteredRegions = $derived(
 		regionSearch.trim() ? REGIONS.filter((r) => r.includes(regionSearch.trim())) : REGIONS
 	);
+
+	const regionVerifyStatus = $derived.by(() => {
+		const iso = $user?.region_verified_at;
+		if (!iso) return { kind: 'none' as const };
+		const verifiedAt = new Date(iso);
+		const days = Math.floor((Date.now() - verifiedAt.getTime()) / 86_400_000);
+		if (days >= VERIFY_FRESH_DAYS) return { kind: 'expired' as const, days };
+		return { kind: 'fresh' as const, days };
+	});
 
 	async function selectRegion(region: string) {
 		savingRegion = true;
@@ -26,6 +38,50 @@
 			toast.error('변경에 실패했어요');
 		} finally {
 			savingRegion = false;
+		}
+	}
+
+	async function verifyRegion() {
+		if (!navigator.geolocation) {
+			toast.error('현재 브라우저에서는 위치 인증을 사용할 수 없어요');
+			return;
+		}
+		verifyingRegion = true;
+		try {
+			const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+				navigator.geolocation.getCurrentPosition(resolve, reject, {
+					enableHighAccuracy: true,
+					timeout: 10_000,
+					maximumAge: 0
+				});
+			});
+			const result = await api.post<{
+				matched: boolean;
+				detected_region: string;
+				detected_2depth: string;
+			}>('/users/me/verify-region', {
+				lat: position.coords.latitude,
+				lng: position.coords.longitude
+			});
+			await fetchMe();
+			if (result.matched) {
+				toast.success('동네 인증을 완료했어요');
+			} else {
+				toast.error(
+					`현재 위치는 ${result.detected_2depth || result.detected_region}으로 확인돼요. 내 동네를 다시 설정해 주세요.`
+				);
+			}
+		} catch (err: unknown) {
+			const code = (err as GeolocationPositionError | undefined)?.code;
+			if (code === 1) {
+				toast.error('위치 권한을 허용해야 인증할 수 있어요');
+			} else if (code === 3) {
+				toast.error('위치 확인 시간이 초과됐어요. 잠시 후 다시 시도해 주세요.');
+			} else {
+				toast.error('인증에 실패했어요');
+			}
+		} finally {
+			verifyingRegion = false;
 		}
 	}
 
@@ -102,6 +158,40 @@
 						<IconChevronRight size={14} stroke={2.5} />
 					</span>
 				</button>
+			</li>
+			<li>
+				<div class="flex items-center justify-between gap-3 px-5 py-3.5">
+					<div class="flex min-w-0 flex-col gap-0.5">
+						<div class="flex items-center gap-1.5">
+							<span class="text-[14px] font-medium text-foreground">동네 GPS 인증</span>
+							{#if regionVerifyStatus.kind === 'fresh'}
+								<span class="inline-flex items-center gap-0.5 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">
+									<IconShieldCheck size={12} stroke={2.5} />
+									인증됨
+								</span>
+							{:else if regionVerifyStatus.kind === 'expired'}
+								<span class="rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">갱신 필요</span>
+							{/if}
+						</div>
+						<p class="truncate text-[12px] text-muted-foreground">
+							{#if regionVerifyStatus.kind === 'fresh'}
+								{regionVerifyStatus.days === 0 ? '오늘' : `${regionVerifyStatus.days}일 전`} 인증
+							{:else if regionVerifyStatus.kind === 'expired'}
+								{regionVerifyStatus.days}일 전 인증 · 다시 확인이 필요해요
+							{:else}
+								현재 위치로 내 동네 정보를 확인해요
+							{/if}
+						</p>
+					</div>
+					<button
+						type="button"
+						onclick={verifyRegion}
+						disabled={verifyingRegion}
+						class="shrink-0 rounded-lg border border-border bg-background px-3 py-1.5 text-[12px] font-semibold text-foreground transition-colors hover:border-foreground disabled:opacity-60"
+					>
+						{verifyingRegion ? '확인 중...' : regionVerifyStatus.kind === 'fresh' ? '다시 인증' : '인증하기'}
+					</button>
+				</div>
 			</li>
 			<li>
 				<a
