@@ -38,7 +38,7 @@
 				>
 					moaorder
 				</a>
-				<p class="mt-3 text-sm text-muted-foreground">동네 공구를 한 곳에서</p>
+				<p class="mt-3 text-base text-muted-foreground sm:text-2xl">동네 공구를 한 곳에서</p>
 			</div>
 
 			<div class="space-y-6 sm:space-y-8">
