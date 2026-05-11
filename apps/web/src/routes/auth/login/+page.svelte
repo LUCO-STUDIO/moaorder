@@ -200,9 +200,9 @@
 					<button
 						onclick={handleKakaoLogin}
 						aria-label="카카오로 로그인"
-						class="flex size-12 items-center justify-center rounded-full bg-[#FEE500] transition-all hover:brightness-95 active:scale-95"
+						class="flex size-12 items-center justify-center rounded-full bg-[#FEE500] transition-all hover:brightness-95 active:scale-95 sm:size-14"
 					>
-						<svg class="size-5" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+						<svg class="size-6" viewBox="0 0 18 18" fill="none" aria-hidden="true">
 							<path
 								d="M9 0.75C4.30547 0.75 0.5 3.7125 0.5 7.36875C0.5 9.84375 2.06719 12.0094 4.41875 13.1719L3.51875 16.4844C3.43906 16.7766 3.78125 17.0156 4.04531 16.8422L7.99844 14.225C8.32812 14.2563 8.66172 14.275 9 14.275C13.6938 14.275 17.5 11.3125 17.5 7.65625C17.5 4 13.6945 0.75 9 0.75Z"
 								fill="#000000"
