@@ -90,7 +90,7 @@
 				<div class="text-center">
 					<a
 						href="/auth/email/forgot"
-						class="text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground sm:text-sm"
+						class="text-xs text-muted-foreground underline underline-offset-2 transition-colors hover:text-foreground"
 					>
 						로그인에 어려움을 겪고 계신가요?
 					</a>
