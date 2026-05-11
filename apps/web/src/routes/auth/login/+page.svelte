@@ -20,6 +20,10 @@
 			last === 'google'
 		) {
 			lastLoginMethod = last;
+		} else if (import.meta.env.DEV) {
+			// Dev-only preview so tooltip placement can be inspected before a
+			// real login lands. Remove once layout is finalized.
+			lastLoginMethod = 'kakao';
 		}
 	});
 
