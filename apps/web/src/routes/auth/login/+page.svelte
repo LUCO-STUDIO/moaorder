@@ -16,7 +16,11 @@
 	let showPassword = $state(false);
 	let rememberEmail = $state(false);
 	let loading = $state(false);
+	let emailError = $state('');
+	let passwordError = $state('');
 	let errorMessage = $state('');
+
+	const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 	onMount(() => {
 		const saved = localStorage.getItem(REMEMBER_KEY);
@@ -26,19 +30,30 @@
 		}
 	});
 
-	const isEmailValid = $derived(
-		/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)
-	);
-	const canSubmit = $derived(isEmailValid && password.length > 0 && !loading);
-
 	function handleKakaoLogin() {
 		const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code`;
 		window.location.href = kakaoAuthUrl;
 	}
 
 	async function handleLogin() {
+		emailError = '';
+		passwordError = '';
 		errorMessage = '';
-		if (!canSubmit) return;
+
+		let hasError = false;
+		if (!email) {
+			emailError = '이메일을 입력해주세요.';
+			hasError = true;
+		} else if (!emailPattern.test(email)) {
+			emailError = '올바른 이메일 형식이 아니에요.';
+			hasError = true;
+		}
+		if (!password) {
+			passwordError = '비밀번호를 입력해주세요.';
+			hasError = true;
+		}
+		if (hasError || loading) return;
+
 		loading = true;
 		try {
 			await api.post('/auth/email/login', { email, password });
@@ -85,38 +100,50 @@
 				}}
 				class="space-y-3"
 			>
-				<input
-					type="email"
-					bind:value={email}
-					placeholder="이메일"
-					autocomplete="email"
-					disabled={loading}
-					aria-label="이메일"
-					class="h-11 w-full rounded-lg border border-input bg-background px-4 text-sm placeholder:text-muted-foreground/60 transition-colors duration-150 hover:border-2 hover:border-primary/40 focus:border-2 focus:border-primary focus:outline-none focus:ring-0 disabled:opacity-50 sm:h-12 sm:text-base"
-				/>
-
-				<div class="relative">
+				<div class="space-y-1.5">
 					<input
-						type={showPassword ? 'text' : 'password'}
-						bind:value={password}
-						placeholder="비밀번호"
-						autocomplete="current-password"
+						type="email"
+						bind:value={email}
+						placeholder="이메일"
+						autocomplete="email"
 						disabled={loading}
-						aria-label="비밀번호"
-						class="h-11 w-full rounded-lg border border-input bg-background px-4 pr-11 text-sm placeholder:text-muted-foreground/60 transition-colors duration-150 hover:border-2 hover:border-primary/40 focus:border-2 focus:border-primary focus:outline-none focus:ring-0 disabled:opacity-50 sm:h-12 sm:pr-12 sm:text-base"
+						aria-label="이메일"
+						aria-invalid={!!emailError}
+						class="h-11 w-full rounded-lg border border-input bg-background px-4 text-sm placeholder:text-muted-foreground/60 transition-colors duration-150 hover:border-2 hover:border-primary/40 focus:border-2 focus:border-primary focus:outline-none focus:ring-0 disabled:opacity-50 sm:h-12 sm:text-base"
 					/>
-					<button
-						type="button"
-						onclick={() => (showPassword = !showPassword)}
-						aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보기'}
-						class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
-					>
-						{#if showPassword}
-							<IconEye class="size-5" />
-						{:else}
-							<IconEyeOff class="size-5" />
-						{/if}
-					</button>
+					{#if emailError}
+						<p class="text-xs text-destructive">{emailError}</p>
+					{/if}
+				</div>
+
+				<div class="space-y-1.5">
+					<div class="relative">
+						<input
+							type={showPassword ? 'text' : 'password'}
+							bind:value={password}
+							placeholder="비밀번호"
+							autocomplete="current-password"
+							disabled={loading}
+							aria-label="비밀번호"
+							aria-invalid={!!passwordError}
+							class="h-11 w-full rounded-lg border border-input bg-background px-4 pr-11 text-sm placeholder:text-muted-foreground/60 transition-colors duration-150 hover:border-2 hover:border-primary/40 focus:border-2 focus:border-primary focus:outline-none focus:ring-0 disabled:opacity-50 sm:h-12 sm:pr-12 sm:text-base"
+						/>
+						<button
+							type="button"
+							onclick={() => (showPassword = !showPassword)}
+							aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보기'}
+							class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
+						>
+							{#if showPassword}
+								<IconEye class="size-5" />
+							{:else}
+								<IconEyeOff class="size-5" />
+							{/if}
+						</button>
+					</div>
+					{#if passwordError}
+						<p class="text-xs text-destructive">{passwordError}</p>
+					{/if}
 				</div>
 
 				{#if errorMessage}
@@ -134,9 +161,9 @@
 
 				<button
 					type="submit"
-					disabled={!canSubmit}
+					disabled={loading}
 					aria-busy={loading}
-					class="relative !mt-6 flex h-11 w-full cursor-pointer items-center justify-center rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground transition-all hover:brightness-95 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:brightness-100 sm:h-12 sm:text-base"
+					class="relative !mt-6 flex h-11 w-full cursor-pointer items-center justify-center rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground transition-all hover:brightness-95 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60 sm:h-12 sm:text-base"
 				>
 					<span class={loading ? 'invisible' : ''}>로그인</span>
 					{#if loading}
