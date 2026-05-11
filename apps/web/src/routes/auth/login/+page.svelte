@@ -17,12 +17,9 @@
 <div class="flex min-h-screen flex-col bg-background">
 	<main class="flex flex-1 items-center justify-center px-6">
 		<div class="w-full max-w-[360px] space-y-10">
-			<div class="text-center">
-				<a href="/" class="inline-block text-[34px] font-black leading-none tracking-[-0.05em] text-foreground">
-					moaorder
-				</a>
-				<p class="mt-3 text-[14px] text-muted-foreground">동네 공구를 한 곳에서</p>
-			</div>
+			<a href="/" class="inline-block text-[34px] font-black leading-none tracking-[-0.05em] text-foreground">
+				moaorder
+			</a>
 
 			<div class="space-y-2.5">
 				<button
